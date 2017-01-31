@@ -1,0 +1,30 @@
+{
+  "name": "chronos-core",
+  "version": "0.0.1",
+  "description": "configuration based workflow orchestration",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "lab -t 100 -a code -L",
+    "test-cover": "lab -a code -L -r html > test/test.html && open test/test.html"
+  },
+  "repository": "git://github.com/xogroup/chronos-core",
+  "keywords": [],
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/xogroup/chronos-core/issues"
+  },
+  "homepage": "https://github.com/xogroup/chronos-core#readme",
+  "dependencies": {
+    "bluebird": "^3.4.7"
+  },
+  "peerDependencies": {
+    "joi": "10.x"
+  },
+  "devDependencies": {
+    "code": "4.x",
+    "lab": "12.x",
+    "mocha": "^3.2.0",
+    "proxyquire": "^1.7.11",
+    "sinon": "^1.17.7"
+  }
+}
