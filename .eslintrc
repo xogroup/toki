@@ -1,0 +1,15 @@
+{
+  "extends": [
+    "hapi"
+  ],
+  "rules": {
+    "consistent-this": [
+      0,
+      "self",
+      "$"
+    ],
+    "space-before-function-paren": [
+      0
+    ]
+  }
+}

@@ -15,7 +15,8 @@
   },
   "homepage": "https://github.com/xogroup/chronos-core#readme",
   "dependencies": {
-    "bluebird": "^3.4.7"
+    "bluebird": "^3.4.7",
+    "boom": "^4.2.0"
   },
   "peerDependencies": {
     "joi": "10.x"
@@ -23,7 +24,6 @@
   "devDependencies": {
     "code": "4.x",
     "lab": "12.x",
-    "mocha": "^3.2.0",
     "proxyquire": "^1.7.11",
     "sinon": "^1.17.7"
   }
