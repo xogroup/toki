@@ -4,7 +4,7 @@ Badges go here once we're public and pushed to npm
 + https://badge.fury.io/
 -->
 
-Lead Maintainer: [Wes Tyler](https://github.com/WesTyler)
+Lead Maintainer: [Cesar Hernandez](https://github.com/cesarhq)
 
 <!-- Badges Go Here -->
 [![npm version](https://badge.fury.io/js/%40toki%2Ftoki.svg)](https://badge.fury.io/js/%40toki%2Ftoki)
