@@ -1,10 +1,10 @@
 'use strict';
 
-// const Lab = require('lab');
-// const lab = exports.lab = Lab.script();
-// const describe = lab.describe;
-// const beforeEach     = lab.beforeEach;
-// const it       = lab.it;
+const Lab = require('lab');
+const lab = exports.lab = Lab.script();
+const describe = lab.describe;
+const beforeEach     = lab.beforeEach;
+const it       = lab.it;
 
 const Code            = require('code');
 const expect          = Code.expect;
