@@ -1,10 +1,10 @@
 {
-  "name": "toki",
+  "name": "@toki/toki",
   "version": "0.0.1",
   "description": "configuration based workflow orchestration",
   "main": "lib/index.js",
   "scripts": {
-    "test": "lab -t 100 -a code -L",
+    "test": "lab -a code -c -L -v",
     "test-cover": "lab -a code -L -r html > test/test.html && open test/test.html"
   },
   "repository": "git://github.com/xogroup/toki",
@@ -16,9 +16,7 @@
   "homepage": "https://github.com/xogroup/toki#readme",
   "dependencies": {
     "bluebird": "^3.4.7",
-    "boom": "^4.2.0"
-  },
-  "peerDependencies": {
+    "boom": "^4.2.0",
     "joi": "10.x"
   },
   "devDependencies": {

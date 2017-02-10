@@ -1,19 +1,5 @@
 language: node_js
 node_js:
-- '4.4'
-- '4'
 - '6'
 - node
 sudo: false
-#deploy:
-#  provider: npm
-#  email: xo-npmjs.group@xogrp.com
-#  api_key:
-#    secure: OVmvrgLhNvZjCQ2a8iX/EL1Q8k7Ws/jbZ7nxEXkiB+mqzE2sHKWDy3zdWAYlxxeTBd/EWgKgfpe6ukxSyJimZTz/t6KBUNxyhNLgmdpCo/NqZhZjsHeLxLb7ekapH4XqV0Z/K6mc1BGIXW9IDU41RpRjNRVuWc6tENqaOKfA7UwD3pFAh0XzKAhbYwcKPiRwGDVf14VxrfuetkPFkz9TeQydOgDRWMVUXPWFH4fnidlVJC03RnEFrv7rqXFqmWMKphC6gXwnifD90WZDsp7RAOf2pUielV8232yjArnNGLHqr2RbyWHZUl/wpJqyRXFtr04TuLQxHDNDmDbCM847zvGYJ0p0/aSs4W+caO79uBlrUgfOBZwpMg7Kn+3JGJau62SnojMglha2hPJ2uS3Cr8PuEbsDf/l09ASLp0rSAc92sUn+oXntgxBgH4aNShIQlSfwsZ+hU38zbm86dy658ESGnGqNoUn50DVnBReWRsjc9b6ENF9aK0ckl41QPCyYmkMf/R6rwdId3c/lZ0Qb3d80dsoC72HEiMyDb7NboO5AS25v4WRfB7Vh/glSGzy33NJWG/0BV6Zh4kKSZQnG8Nus/EK59jaBa9Db90nGr2uApMISQbjzVm0RQ1OQzqlFlosKolI+zpboC/+HK0ROC4nMDEC3HkGLsbI704aTyW0=
-#  on:
-#    tags: true
-#    repo: xogroup/toki
-#before_install: npm install -g npm@'>=2.13.5'
-#notifications:
-#  slack:
-#    secure: TBDxUfHiPNvuzFqFNWfqU4k2uVvhM5GtJzzQNpeezuOY5w3IJzcofA9a9wK/swXejzgtBbqXgwbt2AZJS/YJpsvcJsZa/VaVMUExx1dzHo/m26fTOHpBcV2vOHK2ThkUAIYwA3sdKhJa7h8rn2cKV18ttKBStb+4kJ3FoIus8miAihdiikOGKTdMFx+GPSksi7XtEpPNRyFZTPmTWhuidWSyhLFNKr7hUBJqzlEpJ/fZNXr+mboVOTlWcDyQ+Sul/fdiLiqsABVuA2t7Mn2Tp3JtVwZBUHPk6m4blviW2xYdRjTU4b7dxoRMXvXkYzTofcxY3j9VuP+N/ceqM0I0zx4lFrArZA8k+d0hXQmcrDU5kIPOznY/gtWkXeVElcpFPA9W2JkQw1icbHKpKly09Q4cWGmrEjXx/fwFA5cW4DXRFo71T3crlYBLtFFTCmKT+4ckUugUXL2MYZAuwbk8VqwTKGMNeL1FwhQxu9G/RtCXO5aH3HmQm51vS734f5O0Wukp+wvo4G9H1L7GbHLUs9gi0qVxOE4Wd3ploSUkevj6R58U34Qxft6u6+MyvcEYwQRX1/CvbtanIFWFynwXEJFCcFNqXMBeiV+jJG93qdHwz0TcJuIiNl7KXDvKsXZEOPIdV46YQ9GLtF8J3Pr2fFhfJ0f2ffYROLnFS+eL8Dg=
