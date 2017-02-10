@@ -12,7 +12,6 @@ const Sinon          = require('sinon');
 const Promise        = require('bluebird');
 const Proxyquire     = require('proxyquire').noCallThru();
 const Exceptions     = require('../lib/exceptions');
-const Boom           = require('boom');
 const EventEmitter   = require('events');
 const tokiConfigName = require('../lib/internals').configuration.constants.CONFIG_MDDULE;
 const tokiLoggerName = require('../lib/internals').logger.constants.LOGGER_MODULE;
