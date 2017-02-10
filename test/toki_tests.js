@@ -66,20 +66,28 @@ describe('toki', () => {
 
         info(...args) {
 
-            console.log(args);
             infoSpy();
+            this.log(args);
         }
 
         debug(...args) {
 
-            console.log(args);
             debugSpy();
+            this.log(args);
         }
 
         error(...args) {
 
-            console.log(args);
             errorSpy();
+            this.log(args);
+        }
+
+        log(...args) {
+
+            if (process.env.CONSOLE_DEBUG) {
+
+                console.log(args);
+            }
         }
     }
 
@@ -650,7 +658,7 @@ describe('toki', () => {
                 }
             ]
         };
-        const stubs = Object.assign({},
+        const stubs   = Object.assign({},
             new ConfigurationProxy(config),
             new RouteBuilderProxy());
 
@@ -688,7 +696,7 @@ describe('toki', () => {
                 }
             ]
         };
-        const stubs = Object.assign({},
+        const stubs   = Object.assign({},
             new ConfigurationProxy(config),
             new RouteBuilderProxy());
 
@@ -782,7 +790,7 @@ describe('toki', () => {
                 .then(() => {
 
                     expect(response1.called).to.be.true();
-                    expect(response1.args[0][0]).to.equal(Boom.badImplementation());
+                    expect(response1.args[0][0].message).to.equal('Internal Server Error');
                     expect(action1Spy.called).to.be.true();
                     expect(action2Spy.called).to.be.true();
                     expect(action3Spy.called).to.be.false();
@@ -846,7 +854,7 @@ describe('toki', () => {
                 }
             ]
         };
-        const stubs = Object.assign({},
+        const stubs   = Object.assign({},
             new ConfigurationProxy(config),
             new RouteBuilderProxy());
 

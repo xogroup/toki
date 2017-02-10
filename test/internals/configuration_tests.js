@@ -28,20 +28,28 @@ describe('configuration tests', () => {
 
         info(...args) {
 
-            console.log(args);
             infoSpy();
+            this.log(args);
         }
 
         debug(...args) {
 
-            console.log(args);
             debugSpy();
+            this.log(args);
         }
 
         error(...args) {
 
-            console.log(args);
             errorSpy();
+            this.log(args);
+        }
+
+        log(...args) {
+
+            if (process.env.CONSOLE_DEBUG) {
+
+                console.log(args);
+            }
         }
     }
 

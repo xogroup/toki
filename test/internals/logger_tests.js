@@ -26,16 +26,27 @@ describe('logger tests', () => {
         info(...args) {
 
             infoSpy();
+            this.log(args);
         }
 
         debug(...args) {
 
             debugSpy();
+            this.log(args);
         }
 
         error(...args) {
 
             errorSpy();
+            this.log(args);
+        }
+
+        log(...args) {
+
+            if (process.env.CONSOLE_DEBUG) {
+
+                console.log(args);
+            }
         }
     }
 
