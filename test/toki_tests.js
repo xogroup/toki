@@ -138,12 +138,11 @@ describe('toki', () => {
 
         constructor(stubs) {
 
-            stubs = Object.assign(stubs || {},
-                new LoggerProxy(),
-                new LoggerProxy('./logger')
+            const _stubs = Object.assign(stubs || {},
+                new LoggerProxy()
             );
 
-            return Proxyquire('../lib', stubs);
+            return Proxyquire('../lib', _stubs);
         }
     }
 
@@ -151,7 +150,11 @@ describe('toki', () => {
 
         constructor(stubs) {
 
-            return Proxyquire('../lib/internals/routeHandler', stubs);
+            const _stubs = Object.assign(stubs || {},
+                new LoggerProxy('./logger')
+            );
+
+            return Proxyquire('../lib/internals/routeHandler', _stubs);
         }
     }
 
@@ -167,7 +170,13 @@ describe('toki', () => {
 
         constructor(stubs) {
 
-            return Proxyquire('../lib/internals/routeBuilder', new RouteHandlerProxy(stubs));
+            const _stubs = Object.assign({},
+                stubs || {},
+                new LoggerProxy('./logger'),
+                new RouteHandlerProxy(stubs)
+            );
+
+            return Proxyquire('../lib/internals/routeBuilder', _stubs);
         }
     }
 
@@ -275,7 +284,7 @@ describe('toki', () => {
         });
     });
 
-    it.only('should get a toki instance and build routes', (done) => {
+    it('should get a toki instance and build routes', (done) => {
 
         const options = {
             router: routerStub
@@ -312,7 +321,10 @@ describe('toki', () => {
                 }
             ]
         };
-        const stubs   = new ConfigurationProxy(config);
+        const stubs   = Object.assign({},
+            new ConfigurationProxy(config),
+            new RouteBuilderProxy()
+        );
 
         Toki       = new TokiStub(stubs);
         const toki = new Toki(options);
@@ -638,7 +650,9 @@ describe('toki', () => {
                 }
             ]
         };
-        const stubs   = new ConfigurationProxy(config);
+        const stubs = Object.assign({},
+            new ConfigurationProxy(config),
+            new RouteBuilderProxy());
 
         Toki       = new TokiStub(stubs);
         const toki = new Toki(options);
@@ -674,7 +688,9 @@ describe('toki', () => {
                 }
             ]
         };
-        const stubs   = new ConfigurationProxy(config);
+        const stubs = Object.assign({},
+            new ConfigurationProxy(config),
+            new RouteBuilderProxy());
 
         Toki       = new TokiStub(stubs);
         const toki = new Toki(options);
@@ -794,7 +810,9 @@ describe('toki', () => {
                 }
             ]
         };
-        const configStub = new ConfigurationProxy(config);
+        const configStub = Object.assign({},
+            new ConfigurationProxy(config),
+            new RouteBuilderProxy());
 
         Toki       = new TokiStub(configStub);
         const toki = new Toki(options);
@@ -828,7 +846,9 @@ describe('toki', () => {
                 }
             ]
         };
-        const stubs   = new ConfigurationProxy(config);
+        const stubs = Object.assign({},
+            new ConfigurationProxy(config),
+            new RouteBuilderProxy());
 
         Toki = new TokiStub(stubs);
         new Toki(options);

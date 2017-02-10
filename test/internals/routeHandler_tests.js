@@ -11,6 +11,7 @@ const expect            = Code.expect;
 const Sinon             = require('sinon');
 const Proxyquire        = require('proxyquire').noCallThru();
 const handlerModulePath = '../../lib/internals/routeHandler';
+const tokiLoggerName  = require('../../lib/internals').logger.constants.LOGGER_MODULE;
 
 describe('route handler tests', () => {
 
@@ -20,12 +21,65 @@ describe('route handler tests', () => {
     const action3Spy  = Sinon.spy();
     const action4Spy  = Sinon.spy();
     const responseSpy = Sinon.spy();
+    const infoSpy     = Sinon.spy();
+    const debugSpy    = Sinon.spy();
+    const errorSpy    = Sinon.spy();
+
+    class TokiLoggerStub {
+
+        info(...args) {
+
+            console.log(args);
+            infoSpy();
+        }
+
+        debug(...args) {
+
+            console.log(args);
+            debugSpy();
+        }
+
+        error(...args) {
+
+            console.log(args);
+            errorSpy();
+        }
+    }
+
+    class TokiLoggerProxy {
+
+        constructor() {
+
+            this[tokiLoggerName] = new TokiLoggerStub();
+        }
+    }
+
+    class LoggerProxy {
+
+        constructor() {
+
+            this['./logger'] = new LoggerStub();
+        }
+    }
+
+    class LoggerStub {
+
+        constructor() {
+
+            return Proxyquire('../../lib/internals/logger', new TokiLoggerProxy());
+        }
+    }
 
     class RouteHandlerStub {
 
         constructor(stubs) {
 
-            return Proxyquire(handlerModulePath, stubs);
+            const _stubs = Object.assign({},
+                stubs,
+                new LoggerProxy()
+            );
+
+            return Proxyquire(handlerModulePath, _stubs);
         }
     }
 
@@ -36,6 +90,9 @@ describe('route handler tests', () => {
         action3Spy.reset();
         action4Spy.reset();
         responseSpy.reset();
+        infoSpy.reset();
+        debugSpy.reset();
+        errorSpy.reset();
 
         RouteHandler = new RouteHandlerStub({
             'action-handler1': (input) => {
