@@ -10,7 +10,7 @@ Lead Maintainer: [Wes Tyler](https://github.com/WesTyler)
 [![npm version](https://badge.fury.io/js/%40toki%2Ftoki.svg)](https://badge.fury.io/js/%40toki%2Ftoki)
 [![Build Status](https://travis-ci.org/xogroup/toki.svg?branch=master)](https://travis-ci.org/xogroup/toki)
 [![Known Vulnerabilities](https://snyk.io/test/github/xogroup/toki/badge.svg)](https://snyk.io/test/github/xogroup/toki)
-[![NSP Status](https://nodesecurity.io/orgs/xo-group/projects/9bb6d883-8850-4bcc-bbff-d602e647163c/badge)](https://nodesecurity.io/orgs/xo-group/projects/9bb6d883-8850-4bcc-bbff-d602e647163c)
+[![NSP Status](https://nodesecurity.io/orgs/xo-group/projects/ce9f9a2f-7ab5-4b13-ab8d-a3401eb0c00f/badge)](https://nodesecurity.io/orgs/xo-group/projects/ce9f9a2f-7ab5-4b13-ab8d-a3401eb0c00f)
 
 ## Introduction
 
