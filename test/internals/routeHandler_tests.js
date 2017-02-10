@@ -1,10 +1,10 @@
 'use strict';
 
-const Lab = require('lab');
-const lab = exports.lab = Lab.script();
-const describe   = lab.describe;
-const beforeEach = lab.beforeEach;
-const it         = lab.it;
+// const Lab = require('lab');
+// const lab = exports.lab = Lab.script();
+// const describe   = lab.describe;
+// const beforeEach = lab.beforeEach;
+// const it         = lab.it;
 
 const Code              = require('code');
 const expect            = Code.expect;
@@ -21,6 +21,14 @@ describe('route handler tests', () => {
     const action4Spy  = Sinon.spy();
     const responseSpy = Sinon.spy();
 
+    class RouteHandlerStub {
+
+        constructor(stubs) {
+
+            return Proxyquire(handlerModulePath, stubs);
+        }
+    }
+
     beforeEach((done) => {
 
         action1Spy.reset();
@@ -29,7 +37,7 @@ describe('route handler tests', () => {
         action4Spy.reset();
         responseSpy.reset();
 
-        RouteHandler = Proxyquire(handlerModulePath, {
+        RouteHandler = new RouteHandlerStub({
             'action-handler1': (input) => {
 
                 action1Spy();
@@ -182,7 +190,7 @@ describe('route handler tests', () => {
 
     it('should succeed when sequential actions access previous action output', () => {
 
-        RouteHandler = Proxyquire(handlerModulePath, {
+        RouteHandler = new RouteHandlerStub({
             'action-handler1': (input) => {
 
                 action1Spy();

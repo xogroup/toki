@@ -1,5 +1,5 @@
 {
-  "name": "chronos-core",
+  "name": "toki",
   "version": "0.0.1",
   "description": "configuration based workflow orchestration",
   "main": "lib/index.js",
@@ -7,13 +7,13 @@
     "test": "lab -t 100 -a code -L",
     "test-cover": "lab -a code -L -r html > test/test.html && open test/test.html"
   },
-  "repository": "git://github.com/xogroup/chronos-core",
+  "repository": "git://github.com/xogroup/toki",
   "keywords": [],
   "license": "BSD-3-Clause",
   "bugs": {
-    "url": "https://github.com/xogroup/chronos-core/issues"
+    "url": "https://github.com/xogroup/toki/issues"
   },
-  "homepage": "https://github.com/xogroup/chronos-core#readme",
+  "homepage": "https://github.com/xogroup/toki#readme",
   "dependencies": {
     "bluebird": "^3.4.7",
     "boom": "^4.2.0"

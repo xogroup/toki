@@ -1,23 +1,25 @@
 'use strict';
 
-const Lab = require('lab');
-const lab = exports.lab = Lab.script();
-const describe   = lab.describe;
-const beforeEach = lab.beforeEach;
-const it         = lab.it;
+// const Lab = require('lab');
+// const lab = exports.lab = Lab.script();
+// const describe   = lab.describe;
+// const beforeEach = lab.beforeEach;
+// const it         = lab.it;
 
-const Code         = require('code');
-const expect       = Code.expect;
-const Sinon        = require('sinon');
-const Promise      = require('bluebird');
-const Proxyquire   = require('proxyquire').noCallThru();
-const Exceptions   = require('../lib/exceptions');
-const Boom         = require('boom');
-const EventEmitter = require('events');
+const Code           = require('code');
+const expect         = Code.expect;
+const Sinon          = require('sinon');
+const Promise        = require('bluebird');
+const Proxyquire     = require('proxyquire').noCallThru();
+const Exceptions     = require('../lib/exceptions');
+const Boom           = require('boom');
+const EventEmitter   = require('events');
+const tokiConfigName = require('../lib/internals').configuration.constants.CONFIG_MDDULE;
+const tokiLoggerName = require('../lib/internals').logger.constants.LOGGER_MODULE;
 
-describe('chronos', () => {
+describe('toki', () => {
 
-    let Chronos;
+    let Toki;
     let router;
     let routerStub;
 
@@ -28,6 +30,153 @@ describe('chronos', () => {
     const action5Spy  = Sinon.spy();
     const action6Spy  = Sinon.spy();
     const responseSpy = Sinon.spy();
+    const infoSpy     = Sinon.spy();
+    const debugSpy    = Sinon.spy();
+    const errorSpy    = Sinon.spy();
+
+    class TokiConfigStub extends EventEmitter {
+
+        constructor(config) {
+
+            super();
+
+            this.config = config;
+        }
+
+        get() {
+
+            return Promise.resolve(this.config);
+        }
+    }
+
+    class TokiConfigProxy {
+
+        constructor(config) {
+
+            this[tokiConfigName] = new TokiConfigStub(config);
+        }
+
+        get stub() {
+
+            return this[tokiConfigName];
+        }
+    }
+
+    class TokiLoggerStub {
+
+        info(...args) {
+
+            console.log(args);
+            infoSpy();
+        }
+
+        debug(...args) {
+
+            console.log(args);
+            debugSpy();
+        }
+
+        error(...args) {
+
+            console.log(args);
+            errorSpy();
+        }
+    }
+
+    class TokiLoggerProxy {
+
+        constructor() {
+
+            this[tokiLoggerName] = new TokiLoggerStub();
+        }
+    }
+
+    class LoggerProxy {
+
+        constructor(path) {
+
+            this[path || './internals/logger'] = new LoggerStub();
+        }
+    }
+
+    class LoggerStub {
+
+        constructor() {
+
+            return Proxyquire('../lib/internals/logger', new TokiLoggerProxy());
+        }
+    }
+
+    class ConfigurationStub {
+
+        constructor(config) {
+
+            const proxy = new TokiConfigProxy(config);
+
+            const stubs = Object.assign({},
+                proxy,
+                new LoggerProxy('./logger')
+            );
+
+            return Object.assign(Proxyquire('../lib/internals/configuration', stubs), {
+                stub: proxy.stub
+            });
+        }
+    }
+
+    class ConfigurationProxy {
+
+        constructor(config) {
+
+            const stub                        = new ConfigurationStub(config);
+            this['./internals/configuration'] = stub;
+            this.stub                         = stub.stub;
+        }
+    }
+
+    class TokiStub {
+
+        constructor(stubs) {
+
+            stubs = Object.assign(stubs || {},
+                new LoggerProxy(),
+                new LoggerProxy('./logger')
+            );
+
+            return Proxyquire('../lib', stubs);
+        }
+    }
+
+    class RouteHandlerStub {
+
+        constructor(stubs) {
+
+            return Proxyquire('../lib/internals/routeHandler', stubs);
+        }
+    }
+
+    class RouteHandlerProxy {
+
+        constructor(stubs) {
+
+            this['./routeHandler'] = new RouteHandlerStub(stubs);
+        }
+    }
+
+    class RouteBuilderStub {
+
+        constructor(stubs) {
+
+            return Proxyquire('../lib/internals/routeBuilder', new RouteHandlerProxy(stubs));
+        }
+    }
+
+    class RouteBuilderProxy {
+        constructor(stubs) {
+
+            this['./internals/routeBuilder'] = new RouteBuilderStub(stubs);
+        }
+    }
 
     beforeEach((done) => {
 
@@ -38,13 +187,9 @@ describe('chronos', () => {
         action5Spy.reset();
         action6Spy.reset();
         responseSpy.reset();
-
-        Chronos = Proxyquire('../lib', {
-            'chronos-config': () => {
-
-                return {};
-            }
-        });
+        infoSpy.reset();
+        debugSpy.reset();
+        errorSpy.reset();
 
         const handler = (url, handlerFunc) => {
         };
@@ -64,9 +209,11 @@ describe('chronos', () => {
     it('should throw error when no options passed', (done) => {
 
         const options = undefined;
+        Toki          = new TokiStub();
+
         expect(() => {
 
-            return new Chronos(options);
+            return new Toki(options);
         }).to.throw('"options object" is required');
         done();
     });
@@ -74,58 +221,53 @@ describe('chronos', () => {
     it('should throw error when invalid options passed', (done) => {
 
         const options = {};
+        Toki          = new TokiStub();
+
         expect(() => {
 
-            return new Chronos(options);
+            return new Toki(options);
         }).to.throw('child "router object" fails because ["router object" is required]');
         done();
     });
 
     it('should throw when calling getInstance before new', (done) => {
 
+        Toki = new TokiStub();
+
         expect(() => {
 
-            Chronos.getInstance();
+            Toki.getInstance();
         }).to.throw(Exceptions.NoInstanceError);
         done();
     });
 
-    it('should throw error when not installed chronos-config module', (done) => {
+    it('should throw error when not installed config module', (done) => {
 
         const options = {
             router: routerStub
         };
+
+        Toki = new TokiStub();
+
         expect(() => {
 
-            return new Chronos(options);
-        }).to.throw('Cannot find module \'chronos-config\'');
+            return new Toki(options);
+        }).to.throw('Cannot find module \'' + tokiConfigName + '\'');
         done();
     });
 
     it('should throw error when module config returns invalid config', (done) => {
 
-        const options       = {
+        const options = {
             router: routerStub
         };
-        const config        = {};
-        const Configuration = Proxyquire('../lib/internals/configuration', {
-            'chronos-config': {
-                on : () => {
+        const config  = {};
+        const stubs   = new ConfigurationProxy(config);
 
-                },
-                get: () => {
+        Toki       = new TokiStub(stubs);
+        const toki = new Toki(options);
 
-                    return Promise.resolve(config);
-                }
-            }
-        });
-        Chronos             = Proxyquire('../lib', {
-            './internals/configuration': Configuration
-        });
-
-        const chronos = new Chronos(options);
-
-        chronos.on(Chronos.constants.ERROR_EVENT, (error) => {
+        toki.on(Toki.constants.ERROR_EVENT, (error) => {
 
             expect(error).to.exist();
             expect(error.message).to.equal('child "routes" fails because ["routes" is required]');
@@ -133,7 +275,7 @@ describe('chronos', () => {
         });
     });
 
-    it('should get a chronos instance and build routes', (done) => {
+    it.only('should get a toki instance and build routes', (done) => {
 
         const options = {
             router: routerStub
@@ -170,26 +312,14 @@ describe('chronos', () => {
                 }
             ]
         };
+        const stubs   = new ConfigurationProxy(config);
 
-        const Configuration = Proxyquire('../lib/internals/configuration', {
-            'chronos-config': {
-                on : () => {
+        Toki       = new TokiStub(stubs);
+        const toki = new Toki(options);
 
-                },
-                get: () => {
+        expect(toki).to.be.an.object();
 
-                    return Promise.resolve(config);
-                }
-            }
-        });
-        Chronos             = Proxyquire('../lib', {
-            './internals/configuration': Configuration
-        });
-
-        const chronos = new Chronos(options);
-        expect(chronos).to.be.an.object();
-
-        chronos.on(Chronos.constants.READY_EVENT, () => {
+        toki.on(Toki.constants.READY_EVENT, () => {
 
             expect(routerStub.get.calledOnce).to.be.true();
             expect(routerStub.get.calledWith('route1')).to.be.true();
@@ -199,7 +329,7 @@ describe('chronos', () => {
         });
     });
 
-    it('should get a chronos instance and respond on sequential routes', (done) => {
+    it('should get a toki instance and respond on sequential routes', (done) => {
 
         const routerGet  = Sinon.spy();
         const routerPost = Sinon.spy();
@@ -217,10 +347,10 @@ describe('chronos', () => {
             route2Handler = handler;
         };
 
-        const options = {
+        const options     = {
             router
         };
-        const config  = {
+        const config      = {
             routes: [
                 {
                     path      : 'route1',
@@ -260,20 +390,7 @@ describe('chronos', () => {
                 }
             ]
         };
-
-        const Configuration = Proxyquire('../lib/internals/configuration', {
-            'chronos-config': {
-                on : () => {
-
-                },
-                get: () => {
-
-                    return Promise.resolve(config);
-                }
-            }
-        });
-
-        const RouteHandler = Proxyquire('../lib/internals/routeHandler', {
+        const actionStubs = {
             'action-handler1': function(args) {
 
                 action1Spy();
@@ -314,21 +431,18 @@ describe('chronos', () => {
                 const response = this.action5;
                 args.response(response);
             }
-        });
+        };
 
-        const RouteBuilder = Proxyquire('../lib/internals/routeBuilder', {
-            './routeHandler': RouteHandler
-        });
+        const stubs = Object.assign({},
+            new ConfigurationProxy(config),
+            new RouteBuilderProxy(actionStubs));
 
-        Chronos = Proxyquire('../lib', {
-            './internals/configuration': Configuration,
-            './internals/routeBuilder' : RouteBuilder
-        });
+        Toki       = new TokiStub(stubs);
+        const toki = new Toki(options);
 
-        const chronos = new Chronos(options);
-        expect(chronos).to.be.an.object();
+        expect(toki).to.be.an.object();
 
-        chronos.on(Chronos.constants.READY_EVENT, () => {
+        toki.on(Toki.constants.READY_EVENT, () => {
 
             expect(routerGet.calledOnce).to.be.true();
             expect(routerGet.calledWith('route1')).to.be.true();
@@ -358,7 +472,7 @@ describe('chronos', () => {
         });
     });
 
-    it('should get a chronos instance and respond on parallel routes', (done) => {
+    it('should get a toki instance and respond on parallel routes', (done) => {
 
         const routerGet  = Sinon.spy();
         const routerPost = Sinon.spy();
@@ -423,19 +537,7 @@ describe('chronos', () => {
             ]
         };
 
-        const Configuration = Proxyquire('../lib/internals/configuration', {
-            'chronos-config': {
-                on : () => {
-
-                },
-                get: () => {
-
-                    return Promise.resolve(config);
-                }
-            }
-        });
-
-        const RouteHandler = Proxyquire('../lib/internals/routeHandler', {
+        const actionStubs = {
             'action-handler1': function(args) {
 
                 action1Spy();
@@ -476,21 +578,18 @@ describe('chronos', () => {
                 const response = Object.assign({}, this.action4, this.action5);
                 args.response(response);
             }
-        });
+        };
 
-        const RouteBuilder = Proxyquire('../lib/internals/routeBuilder', {
-            './routeHandler': RouteHandler
-        });
+        const stubs = Object.assign({},
+            new ConfigurationProxy(config),
+            new RouteBuilderProxy(actionStubs));
 
-        Chronos = Proxyquire('../lib', {
-            './internals/configuration': Configuration,
-            './internals/routeBuilder' : RouteBuilder
-        });
+        Toki       = new TokiStub(stubs);
+        const toki = new Toki(options);
 
-        const chronos = new Chronos(options);
-        expect(chronos).to.be.an.object();
+        expect(toki).to.be.an.object();
 
-        chronos.on(Chronos.constants.READY_EVENT, () => {
+        toki.on(Toki.constants.READY_EVENT, () => {
 
             expect(routerGet.calledOnce).to.be.true();
             expect(routerGet.calledWith('route1')).to.be.true();
@@ -522,10 +621,10 @@ describe('chronos', () => {
 
     it('should return same instance after new', (done) => {
 
-        const options       = {
+        const options = {
             router: routerStub
         };
-        const config        = {
+        const config  = {
             routes: [
                 {
                     path      : 'route1',
@@ -539,41 +638,29 @@ describe('chronos', () => {
                 }
             ]
         };
-        const Configuration = Proxyquire('../lib/internals/configuration', {
-            'chronos-config': {
-                on : () => {
+        const stubs   = new ConfigurationProxy(config);
 
-                },
-                get: () => {
+        Toki       = new TokiStub(stubs);
+        const toki = new Toki(options);
 
-                    return Promise.resolve(config);
-                }
-            }
-        });
-        Chronos             = Proxyquire('../lib', {
-            './internals/configuration': Configuration
-        });
-
-        const chronos = new Chronos(options);
-
-        let chronos1;
+        let toki1;
 
         expect(() => {
 
-            chronos1 = new Chronos(options);
+            toki1 = new Toki(options);
         }).to.not.throw();
 
-        expect(chronos1).to.exist();
-        expect(chronos1).to.equal(chronos);
+        expect(toki1).to.exist();
+        expect(toki1).to.equal(toki);
         done();
     });
 
     it('should getInstance after new', (done) => {
 
-        const options       = {
+        const options = {
             router: routerStub
         };
-        const config        = {
+        const config  = {
             routes: [
                 {
                     path      : 'route1',
@@ -587,32 +674,20 @@ describe('chronos', () => {
                 }
             ]
         };
-        const Configuration = Proxyquire('../lib/internals/configuration', {
-            'chronos-config': {
-                on : () => {
+        const stubs   = new ConfigurationProxy(config);
 
-                },
-                get: () => {
+        Toki       = new TokiStub(stubs);
+        const toki = new Toki(options);
 
-                    return Promise.resolve(config);
-                }
-            }
-        });
-        Chronos             = Proxyquire('../lib', {
-            './internals/configuration': Configuration
-        });
-
-        const chronos = new Chronos(options);
-
-        let chronos1;
+        let toki1;
 
         expect(() => {
 
-            chronos1 = Chronos.getInstance();
+            toki1 = Toki.getInstance();
         }).to.not.throw();
 
-        expect(chronos1).to.exist();
-        expect(chronos1).to.equal(chronos);
+        expect(toki1).to.exist();
+        expect(toki1).to.equal(toki);
         done();
     });
 
@@ -652,19 +727,7 @@ describe('chronos', () => {
             ]
         };
 
-        const Configuration = Proxyquire('../lib/internals/configuration', {
-            'chronos-config': {
-                on : () => {
-
-                },
-                get: () => {
-
-                    return Promise.resolve(config);
-                }
-            }
-        });
-
-        const RouteHandler = Proxyquire('../lib/internals/routeHandler', {
+        const actionStubs = {
             'action-handler1': function(args) {
 
                 action1Spy();
@@ -682,21 +745,17 @@ describe('chronos', () => {
                 action3Spy();
                 args.response(this.action2);
             }
-        });
+        };
+        const stubs       = Object.assign({},
+            new ConfigurationProxy(config),
+            new RouteBuilderProxy(actionStubs));
 
-        const RouteBuilder = Proxyquire('../lib/internals/routeBuilder', {
-            './routeHandler': RouteHandler
-        });
+        Toki       = new TokiStub(stubs);
+        const toki = new Toki(options);
 
-        Chronos = Proxyquire('../lib', {
-            './internals/configuration': Configuration,
-            './internals/routeBuilder' : RouteBuilder
-        });
+        expect(toki).to.be.an.object();
 
-        const chronos = new Chronos(options);
-        expect(chronos).to.be.an.object();
-
-        chronos.on(Chronos.constants.READY_EVENT, () => {
+        toki.on(Toki.constants.READY_EVENT, () => {
 
             expect(routerGet.calledOnce).to.be.true();
             expect(routerGet.calledWith('route1')).to.be.true();
@@ -707,12 +766,10 @@ describe('chronos', () => {
                 .then(() => {
 
                     expect(response1.called).to.be.true();
-                    expect(response1.calledWith(Boom.badImplementation()));
-
+                    expect(response1.args[0][0]).to.equal(Boom.badImplementation());
                     expect(action1Spy.called).to.be.true();
                     expect(action2Spy.called).to.be.true();
                     expect(action3Spy.called).to.be.false();
-
                     done();
                 });
         });
@@ -720,10 +777,10 @@ describe('chronos', () => {
 
     it('should handle config.changed event', (done) => {
 
-        const options = {
+        const options    = {
             router
         };
-        const config  = {
+        const config     = {
             routes: [
                 {
                     path      : 'route1',
@@ -737,33 +794,62 @@ describe('chronos', () => {
                 }
             ]
         };
+        const configStub = new ConfigurationProxy(config);
 
-        class ChronosConfig extends EventEmitter {
-            get() {
+        Toki       = new TokiStub(configStub);
+        const toki = new Toki(options);
 
-                return Promise.resolve(config);
-            }
-        }
-        const chronosConfig = new ChronosConfig();
+        expect(toki).to.be.an.object();
 
-        const Configuration = Proxyquire('../lib/internals/configuration', {
-            'chronos-config': chronosConfig
-        });
-
-        Chronos = Proxyquire('../lib', {
-            './internals/configuration': Configuration
-        });
-
-        const chronos = new Chronos(options);
-        expect(chronos).to.be.an.object();
-
-        chronos.on(Chronos.constants.CONFIG_CHANGED_EVENT, () => {
+        toki.on(Toki.constants.CONFIG_CHANGED_EVENT, () => {
 
             done();
         });
 
-        chronosConfig.emit('config.changed');
+        configStub.stub.emit('config.changed');
     });
 
-    //logging
+    it('should log debug/info', (done) => {
+
+        const options = {
+            router: routerStub
+        };
+        const config  = {
+            routes: [
+                {
+                    path      : 'route1',
+                    httpAction: 'GET',
+                    actions   : [
+                        {
+                            name: 'action1',
+                            type: 'proc1'
+                        }
+                    ]
+                }
+            ]
+        };
+        const stubs   = new ConfigurationProxy(config);
+
+        Toki = new TokiStub(stubs);
+        new Toki(options);
+
+        expect(debugSpy.called).to.be.true();
+        expect(infoSpy.called).to.be.true();
+
+        done();
+    });
+
+    it('should log error', (done) => {
+
+        Toki = new TokiStub();
+
+        expect(() => {
+
+            Toki.getInstance();
+        }).to.throw();
+
+        expect(errorSpy.called).to.be.true();
+
+        done();
+    });
 });

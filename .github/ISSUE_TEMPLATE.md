@@ -1,7 +1,7 @@
 #### Context
 
 * *node version*:
-* *chronos-core version*:
+* *toki version*:
 * *environment* (node, browser):
 * *any relevant modules used with* (hapi, hoek, etc.):
 * *any other relevant information*:
