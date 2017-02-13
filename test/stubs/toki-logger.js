@@ -6,6 +6,7 @@ const tokiLoggerName = require(loggerPath).constants.LOGGER_MODULE;
 class TokiLoggerStub {
 
     constructor(spies = {}) {
+
         this.spies = spies;
     }
 

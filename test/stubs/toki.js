@@ -1,9 +1,9 @@
 'use strict';
 
 const Proxyquire    = require('proxyquire').noCallThru();
-const logger        = require('./logger');
-const configuration = require('./configuration');
-const routeBuilder  = require('./routeBuilder');
+const Logger        = require('./logger');
+const Configuration = require('./configuration');
+const RouteBuilder  = require('./routeBuilder');
 
 class TokiStub {
 
@@ -14,20 +14,20 @@ class TokiStub {
         if (options.LoggerProxy) {
             stubs = Object.assign(
                 stubs,
-                new logger.LoggerProxy(options.LoggerProxy)
+                new Logger.LoggerProxy(options.LoggerProxy)
             );
         }
 
         if (options.ConfigurationProxy) {
             stubs = Object.assign(
                 stubs,
-                new configuration.ConfigurationProxy(options.ConfigurationProxy));
+                new Configuration.ConfigurationProxy(options.ConfigurationProxy));
         }
 
         if (options.RouteBuilderProxy) {
             stubs = Object.assign(
                 stubs,
-                new routeBuilder.RouteBuilderProxy(options.RouteBuilderProxy));
+                new RouteBuilder.RouteBuilderProxy(options.RouteBuilderProxy));
         }
 
         return Proxyquire('../../lib', stubs);

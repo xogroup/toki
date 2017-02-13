@@ -1,8 +1,8 @@
 'use strict';
 
 const Proxyquire   = require('proxyquire').noCallThru();
-const logger       = require('./logger');
-const routeHandler = require('./routeHandler');
+const Logger       = require('./logger');
+const RouteHandler = require('./routeHandler');
 
 class RouteBuilderStub {
 
@@ -10,8 +10,8 @@ class RouteBuilderStub {
 
         const _options = Object.assign({},
             options.stubs || {},
-            new routeHandler.RouteHandlerProxy(options.RouteHandlerProxy),
-            new logger.LoggerProxy(options.LoggerProxy)
+            new RouteHandler.RouteHandlerProxy(options.RouteHandlerProxy),
+            new Logger.LoggerProxy(options.LoggerProxy)
         );
 
         return Proxyquire('../../lib/internals/routeBuilder', _options);
