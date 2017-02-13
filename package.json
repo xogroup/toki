@@ -1,5 +1,5 @@
 {
-  "name": "@toki/toki",
+  "name": "toki",
   "version": "0.0.1",
   "description": "configuration based workflow orchestration",
   "main": "lib/index.js",
@@ -18,10 +18,10 @@
   },
   "homepage": "https://github.com/xogroup/toki#readme",
   "dependencies": {
-    "@toki/toki-logger": "0.0.3",
     "bluebird": "^3.4.7",
     "boom": "^4.2.0",
-    "joi": "10.x"
+    "joi": "10.x",
+    "toki-logger": "1.2.2"
   },
   "devDependencies": {
     "code": "4.x",
