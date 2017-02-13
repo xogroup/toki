@@ -1,20 +1,16 @@
 'use strict';
 
-const Lab = require('lab');
-const lab = exports.lab = Lab.script();
-const describe = lab.describe;
-const before     = lab.before;
-const it       = lab.it;
+// const Lab = require('lab');
+// const lab = exports.lab = Lab.script();
+// const describe = lab.describe;
+// const beforeEach     = lab.beforeEach;
+// const it       = lab.it;
 
 const Code            = require('code');
 const expect          = Code.expect;
 const Sinon           = require('sinon');
 const Promise         = require('bluebird');
-const Proxyquire      = require('proxyquire').noCallThru();
-const EventEmitter    = require('events');
-const configClassPath = '../../lib/internals/configuration';
-const tokiConfigName  = require(configClassPath).constants.CONFIG_MDDULE;
-const tokiLoggerName  = require('../../lib/internals').logger.constants.LOGGER_MODULE;
+const Stubs           = require('../stubs').Configuration;
 
 describe('configuration tests', () => {
 
@@ -24,105 +20,27 @@ describe('configuration tests', () => {
     const debugSpy = Sinon.spy();
     const errorSpy = Sinon.spy();
 
-    class TokiLoggerStub {
-
-        info(...args) {
-
-            infoSpy();
-            this.log(args);
-        }
-
-        debug(...args) {
-
-            debugSpy();
-            this.log(args);
-        }
-
-        error(...args) {
-
-            errorSpy();
-            this.log(args);
-        }
-
-        log(...args) {
-
-            if (process.env.CONSOLE_DEBUG) {
-
-                console.log(args);
-            }
-        }
-    }
-
-    class TokiLoggerProxy {
-
-        constructor() {
-
-            this[tokiLoggerName] = new TokiLoggerStub();
-        }
-    }
-
-    class LoggerProxy {
-
-        constructor() {
-
-            this['./logger'] = new LoggerStub();
-        }
-    }
-
-    class LoggerStub {
-
-        constructor() {
-
-            return Proxyquire('../../lib/internals/logger', new TokiLoggerProxy());
-        }
-    }
-
-    class TokiConfig extends EventEmitter {
-
-        constructor(config) {
-
-            super();
-
-            this.config = config;
-        }
-
-        get() {
-
-            return Promise.resolve(this.config);
-        }
-    }
-
-    class TokiConfigStub {
-
-        constructor(config) {
-
-            this[tokiConfigName] = new TokiConfig(config);
-        }
-
-        get stub() {
-
-            return this[tokiConfigName];
-        }
-    }
-
     class ConfigurationStub {
 
         constructor(config) {
 
-            const proxy = new TokiConfigStub(config);
+            const options = {
+                TokiConfigProxy: config,
+                LoggerProxy    : {
+                    path : './logger',
+                    spies: {
+                        infoSpy,
+                        debugSpy,
+                        errorSpy
+                    }
+                }
+            };
 
-            const stubs = Object.assign({},
-                proxy,
-                new LoggerProxy('./logger')
-            );
-
-            return Object.assign(Proxyquire(configClassPath, stubs), {
-                stub: proxy.stub
-            });
+            return new Stubs.ConfigurationStub(options);
         }
     }
 
-    before((done) => {
+    beforeEach((done) => {
 
         infoSpy.reset();
         debugSpy.reset();
@@ -130,16 +48,16 @@ describe('configuration tests', () => {
         done();
     });
 
-    it('should throw if toki-config not installed', (done) => {
-
-        Configuration = Proxyquire(configClassPath, {});
-
-        expect(() => {
-
-            return new Configuration();
-        }).to.throw('Cannot find module \'' + tokiConfigName + '\'');
-        done();
-    });
+    // it('should succeed requiring toki-config', (done) => {
+    //
+    //     Configuration = require('../../lib/internals').configuration;
+    //
+    //     expect(() => {
+    //
+    //         return new Configuration();
+    //     }).to.not.throw();
+    //     done();
+    // });
 
     it('should create instance', (done) => {
 
@@ -448,6 +366,6 @@ describe('configuration tests', () => {
             done();
         });
 
-        Configuration.stub.emit(Configuration.constants.CONFIG_CHANGED_EVENT);
+        Configuration.tokiConfig.emit(Configuration.constants.CONFIG_CHANGED_EVENT);
     });
 });

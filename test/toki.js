@@ -1,10 +1,10 @@
 'use strict';
 
-const Lab = require('lab');
-const lab = exports.lab = Lab.script();
-const describe   = lab.describe;
-const beforeEach = lab.beforeEach;
-const it         = lab.it;
+// const Lab = require('lab');
+// const lab = exports.lab = Lab.script();
+// const describe   = lab.describe;
+// const beforeEach = lab.beforeEach;
+// const it         = lab.it;
 
 const Code           = require('code');
 const expect         = Code.expect;
@@ -15,6 +15,8 @@ const Exceptions     = require('../lib/exceptions');
 const EventEmitter   = require('events');
 const tokiConfigName = require('../lib/internals').configuration.constants.CONFIG_MDDULE;
 const tokiLoggerName = require('../lib/internals').logger.constants.LOGGER_MODULE;
+const Stubs          = require('./stubs').Toki;
+const ConfigStub     = require('./stubs').Configuration;
 
 describe('toki', () => {
 
@@ -33,164 +35,25 @@ describe('toki', () => {
     const debugSpy    = Sinon.spy();
     const errorSpy    = Sinon.spy();
 
-    class TokiConfigStub extends EventEmitter {
-
-        constructor(config) {
-
-            super();
-
-            this.config = config;
-        }
-
-        get() {
-
-            return Promise.resolve(this.config);
-        }
-    }
-
-    class TokiConfigProxy {
-
-        constructor(config) {
-
-            this[tokiConfigName] = new TokiConfigStub(config);
-        }
-
-        get stub() {
-
-            return this[tokiConfigName];
-        }
-    }
-
-    class TokiLoggerStub {
-
-        info(...args) {
-
-            infoSpy();
-            this.log(args);
-        }
-
-        debug(...args) {
-
-            debugSpy();
-            this.log(args);
-        }
-
-        error(...args) {
-
-            errorSpy();
-            this.log(args);
-        }
-
-        log(...args) {
-
-            if (process.env.CONSOLE_DEBUG) {
-
-                console.log(args);
-            }
-        }
-    }
-
-    class TokiLoggerProxy {
-
-        constructor() {
-
-            this[tokiLoggerName] = new TokiLoggerStub();
-        }
-    }
-
-    class LoggerProxy {
-
-        constructor(path) {
-
-            this[path || './internals/logger'] = new LoggerStub();
-        }
-    }
-
-    class LoggerStub {
-
-        constructor() {
-
-            return Proxyquire('../lib/internals/logger', new TokiLoggerProxy());
-        }
-    }
-
-    class ConfigurationStub {
-
-        constructor(config) {
-
-            const proxy = new TokiConfigProxy(config);
-
-            const stubs = Object.assign({},
-                proxy,
-                new LoggerProxy('./logger')
-            );
-
-            return Object.assign(Proxyquire('../lib/internals/configuration', stubs), {
-                stub: proxy.stub
-            });
-        }
-    }
-
-    class ConfigurationProxy {
-
-        constructor(config) {
-
-            const stub                        = new ConfigurationStub(config);
-            this['./internals/configuration'] = stub;
-            this.stub                         = stub.stub;
-        }
-    }
-
     class TokiStub {
 
-        constructor(stubs) {
+        constructor(options) {
 
-            const _stubs = Object.assign(stubs || {},
-                new LoggerProxy()
-            );
+            const _options = Object.assign(
+                options || {},
+                {
+                    LoggerProxy: {
+                        path : './internals/logger',
+                        spies: {
+                            infoSpy,
+                            debugSpy,
+                            errorSpy
+                        }
+                    }
+                });
 
-            return Proxyquire('../lib', _stubs);
-        }
-    }
+            return new Stubs.TokiStub(_options);
 
-    class RouteHandlerStub {
-
-        constructor(stubs) {
-
-            const _stubs = Object.assign(stubs || {},
-                new LoggerProxy('./logger')
-            );
-
-            return Proxyquire('../lib/internals/routeHandler', _stubs);
-        }
-    }
-
-    class RouteHandlerProxy {
-
-        constructor(stubs) {
-
-            this['./routeHandler'] = new RouteHandlerStub(stubs);
-        }
-    }
-
-    class RouteBuilderStub {
-
-        constructor(stubs) {
-
-            const _stubs = Object.assign({},
-                stubs || {},
-                new LoggerProxy('./logger'),
-                new RouteHandlerProxy(stubs)
-            );
-
-            return Proxyquire('../lib/internals/routeBuilder', _stubs);
-        }
-    }
-
-    class RouteBuilderProxy {
-        constructor(stubs) {
-
-            this['./internals/routeBuilder'] = new RouteBuilderStub(stubs);
         }
     }
 
@@ -278,7 +141,20 @@ describe('toki', () => {
             router: routerStub
         };
         const config  = {};
-        const stubs   = new ConfigurationProxy(config);
+        const stubs   = {
+            ConfigurationProxy: {
+                TokiConfigProxy: config,
+                path           : './internals/configuration',
+                LoggerProxy    : {
+                    path : './logger',
+                    spies: {
+                        infoSpy,
+                        debugSpy,
+                        errorSpy
+                    }
+                }
+            }
+        };
 
         Toki       = new TokiStub(stubs);
         const toki = new Toki(options);
@@ -293,10 +169,10 @@ describe('toki', () => {
 
     it('should get a toki instance and build routes', (done) => {
 
-        const options = {
+        const options     = {
             router: routerStub
         };
-        const config  = {
+        const config      = {
             routes: [
                 {
                     path      : 'route1',
@@ -328,10 +204,29 @@ describe('toki', () => {
                 }
             ]
         };
-        const stubs   = Object.assign({},
-            new ConfigurationProxy(config),
-            new RouteBuilderProxy()
-        );
+        const LoggerProxy = {
+            path : './logger',
+            spies: {
+                infoSpy,
+                debugSpy,
+                errorSpy
+            }
+        };
+        const stubs       = {
+            ConfigurationProxy: {
+                TokiConfigProxy: config,
+                path           : './internals/configuration',
+                LoggerProxy
+            },
+            RouteBuilderProxy : {
+                path             : './internals/routeBuilder',
+                RouteHandlerProxy: {
+                    path: './routeHandler',
+                    LoggerProxy
+                },
+                LoggerProxy
+            }
+        };
 
         Toki       = new TokiStub(stubs);
         const toki = new Toki(options);
@@ -451,10 +346,30 @@ describe('toki', () => {
                 args.response(response);
             }
         };
-
-        const stubs = Object.assign({},
-            new ConfigurationProxy(config),
-            new RouteBuilderProxy(actionStubs));
+        const LoggerProxy = {
+            path : './logger',
+            spies: {
+                infoSpy,
+                debugSpy,
+                errorSpy
+            }
+        };
+        const stubs       = {
+            ConfigurationProxy: {
+                TokiConfigProxy: config,
+                path           : './internals/configuration',
+                LoggerProxy
+            },
+            RouteBuilderProxy : {
+                path             : './internals/routeBuilder',
+                RouteHandlerProxy: {
+                    stubs: actionStubs,
+                    path : './routeHandler',
+                    LoggerProxy
+                },
+                LoggerProxy
+            }
+        };
 
         Toki       = new TokiStub(stubs);
         const toki = new Toki(options);
@@ -498,20 +413,21 @@ describe('toki', () => {
         let route1Handler;
         let route2Handler;
 
-        router.get    = function(url, handler) {
+        router.get  = function(url, handler) {
 
             routerGet(url);
             route1Handler = handler;
         };
-        router.post   = function(url, handler) {
+        router.post = function(url, handler) {
 
             routerPost(url);
             route2Handler = handler;
         };
-        const options = {
+
+        const options     = {
             router
         };
-        const config  = {
+        const config      = {
             routes: [
                 {
                     path      : 'route1',
@@ -555,7 +471,6 @@ describe('toki', () => {
                 }
             ]
         };
-
         const actionStubs = {
             'action-handler1': function(args) {
 
@@ -598,10 +513,30 @@ describe('toki', () => {
                 args.response(response);
             }
         };
-
-        const stubs = Object.assign({},
-            new ConfigurationProxy(config),
-            new RouteBuilderProxy(actionStubs));
+        const LoggerProxy = {
+            path : './logger',
+            spies: {
+                infoSpy,
+                debugSpy,
+                errorSpy
+            }
+        };
+        const stubs       = {
+            ConfigurationProxy: {
+                TokiConfigProxy: config,
+                path           : './internals/configuration',
+                LoggerProxy
+            },
+            RouteBuilderProxy : {
+                path             : './internals/routeBuilder',
+                RouteHandlerProxy: {
+                    stubs: actionStubs,
+                    path : './routeHandler',
+                    LoggerProxy
+                },
+                LoggerProxy
+            }
+        };
 
         Toki       = new TokiStub(stubs);
         const toki = new Toki(options);
@@ -657,9 +592,30 @@ describe('toki', () => {
                 }
             ]
         };
-        const stubs   = Object.assign({},
-            new ConfigurationProxy(config),
-            new RouteBuilderProxy());
+
+        const LoggerProxy = {
+            path : './logger',
+            spies: {
+                infoSpy,
+                debugSpy,
+                errorSpy
+            }
+        };
+        const stubs       = {
+            ConfigurationProxy: {
+                TokiConfigProxy: config,
+                path           : './internals/configuration',
+                LoggerProxy
+            },
+            RouteBuilderProxy : {
+                path             : './internals/routeBuilder',
+                RouteHandlerProxy: {
+                    path: './routeHandler',
+                    LoggerProxy
+                },
+                LoggerProxy
+            }
+        };
 
         Toki       = new TokiStub(stubs);
         const toki = new Toki(options);
@@ -695,9 +651,30 @@ describe('toki', () => {
                 }
             ]
         };
-        const stubs   = Object.assign({},
-            new ConfigurationProxy(config),
-            new RouteBuilderProxy());
+
+        const LoggerProxy = {
+            path : './logger',
+            spies: {
+                infoSpy,
+                debugSpy,
+                errorSpy
+            }
+        };
+        const stubs       = {
+            ConfigurationProxy: {
+                TokiConfigProxy: config,
+                path           : './internals/configuration',
+                LoggerProxy
+            },
+            RouteBuilderProxy : {
+                path             : './internals/routeBuilder',
+                RouteHandlerProxy: {
+                    path: './routeHandler',
+                    LoggerProxy
+                },
+                LoggerProxy
+            }
+        };
 
         Toki       = new TokiStub(stubs);
         const toki = new Toki(options);
@@ -719,15 +696,15 @@ describe('toki', () => {
         const routerGet = Sinon.spy();
         let route1Handler;
 
-        router.get    = function(url, handler) {
+        router.get        = function(url, handler) {
 
             routerGet(url);
             route1Handler = handler;
         };
-        const options = {
+        const options     = {
             router
         };
-        const config  = {
+        const config      = {
             routes: [
                 {
                     path      : 'route1',
@@ -749,7 +726,6 @@ describe('toki', () => {
                 }
             ]
         };
-
         const actionStubs = {
             'action-handler1': function(args) {
 
@@ -769,9 +745,30 @@ describe('toki', () => {
                 args.response(this.action2);
             }
         };
-        const stubs       = Object.assign({},
-            new ConfigurationProxy(config),
-            new RouteBuilderProxy(actionStubs));
+        const LoggerProxy = {
+            path : './logger',
+            spies: {
+                infoSpy,
+                debugSpy,
+                errorSpy
+            }
+        };
+        const stubs       = {
+            ConfigurationProxy: {
+                TokiConfigProxy: config,
+                path           : './internals/configuration',
+                LoggerProxy
+            },
+            RouteBuilderProxy : {
+                path             : './internals/routeBuilder',
+                RouteHandlerProxy: {
+                    stubs: actionStubs,
+                    path : './routeHandler',
+                    LoggerProxy
+                },
+                LoggerProxy
+            }
+        };
 
         Toki       = new TokiStub(stubs);
         const toki = new Toki(options);
@@ -800,10 +797,10 @@ describe('toki', () => {
 
     it('should handle config.changed event', (done) => {
 
-        const options    = {
+        const options     = {
             router
         };
-        const config     = {
+        const config      = {
             routes: [
                 {
                     path      : 'route1',
@@ -817,11 +814,37 @@ describe('toki', () => {
                 }
             ]
         };
-        const configStub = Object.assign({},
-            new ConfigurationProxy(config),
-            new RouteBuilderProxy());
+        const LoggerProxy = {
+            path : './logger',
+            spies: {
+                infoSpy,
+                debugSpy,
+                errorSpy
+            }
+        };
+        const configStub = new ConfigStub.ConfigurationProxy({
+            TokiConfigProxy: config,
+            path           : './internals/configuration',
+            LoggerProxy
+        });
 
-        Toki       = new TokiStub(configStub);
+        const stubs = {
+            stubs : configStub,
+            RouteBuilderProxy: {
+                path             : './internals/routeBuilder',
+                RouteHandlerProxy: {
+                    path: './routeHandler',
+                    LoggerProxy
+                },
+                LoggerProxy
+            }
+        };
+
+        // const configStub = Object.assign({},
+        //     new ConfigurationProxy(config),
+        //     new RouteBuilderProxy());
+
+        Toki       = new TokiStub(stubs);
         const toki = new Toki(options);
 
         expect(toki).to.be.an.object();
@@ -831,15 +854,15 @@ describe('toki', () => {
             done();
         });
 
-        configStub.stub.emit('config.changed');
+        configStub.stub.tokiConfig.emit('config.changed');
     });
 
     it('should log debug/info', (done) => {
 
-        const options = {
+        const options     = {
             router: routerStub
         };
-        const config  = {
+        const config      = {
             routes: [
                 {
                     path      : 'route1',
@@ -853,9 +876,29 @@ describe('toki', () => {
                 }
             ]
         };
-        const stubs   = Object.assign({},
-            new ConfigurationProxy(config),
-            new RouteBuilderProxy());
+        const LoggerProxy = {
+            path : './logger',
+            spies: {
+                infoSpy,
+                debugSpy,
+                errorSpy
+            }
+        };
+        const stubs       = {
+            ConfigurationProxy: {
+                TokiConfigProxy: config,
+                path           : './internals/configuration',
+                LoggerProxy
+            },
+            RouteBuilderProxy : {
+                path             : './internals/routeBuilder',
+                RouteHandlerProxy: {
+                    path: './routeHandler',
+                    LoggerProxy
+                },
+                LoggerProxy
+            }
+        };
 
         Toki = new TokiStub(stubs);
         new Toki(options);

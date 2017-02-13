@@ -1,17 +1,16 @@
 'use strict';
 
-const Lab = require('lab');
-const lab = exports.lab = Lab.script();
-const describe   = lab.describe;
-const beforeEach = lab.beforeEach;
-const it         = lab.it;
+// const Lab = require('lab');
+// const lab = exports.lab = Lab.script();
+// const describe   = lab.describe;
+// const beforeEach = lab.beforeEach;
+// const it         = lab.it;
 
 const Code           = require('code');
 const expect         = Code.expect;
 const Sinon          = require('sinon');
 const Exceptions     = require('../../lib/exceptions');
-const Proxyquire     = require('proxyquire').noCallThru();
-const tokiLoggerName = require('../../lib/internals').logger.constants.LOGGER_MODULE;
+const Stubs          = require('../stubs').RouteBuilder;
 
 describe('routes builder tests', () => {
 
@@ -23,98 +22,27 @@ describe('routes builder tests', () => {
     const debugSpy = Sinon.spy();
     const errorSpy = Sinon.spy();
 
-    class TokiLoggerStub {
-
-        info(...args) {
-
-            infoSpy();
-            this.log(args);
-        }
-
-        debug(...args) {
-
-            debugSpy();
-            this.log(args);
-        }
-
-        error(...args) {
-
-            errorSpy();
-            this.log(args);
-        }
-
-        log(...args) {
-
-            if (process.env.CONSOLE_DEBUG) {
-
-                console.log(args);
-            }
-        }
-    }
-
-    class TokiLoggerProxy {
-
-        constructor() {
-
-            this[tokiLoggerName] = new TokiLoggerStub();
-        }
-    }
-
-    class LoggerProxy {
-
-        constructor() {
-
-            this['./logger'] = new LoggerStub();
-        }
-    }
-
-    class LoggerStub {
-
-        constructor() {
-
-            return Proxyquire('../../lib/internals/logger', new TokiLoggerProxy());
-        }
-    }
-
-    class RouteHandlerStub {
-
-        constructor() {
-
-            const stubs = Object.assign({},
-                new LoggerProxy()
-            );
-
-            return Proxyquire('../../lib/internals/routeHandler', stubs);
-        }
-    }
-
-    class RouteHandlerProxy {
-
-        constructor() {
-
-            this['./routeHandler'] = new RouteHandlerStub();
-        }
-    }
-
-    class RouteBuilderStub {
-
-        constructor() {
-
-            const stubs = Object.assign({},
-                new RouteHandlerProxy(),
-                new LoggerProxy()
-            );
-
-            return Proxyquire('../../lib/internals/routeBuilder', stubs);
-        }
-    }
-
     beforeEach((done) => {
 
         const handler = (url, handlerFunc) => {
         };
 
-        RouteBuilder = new RouteBuilderStub();
+        const loggerOptions = {
+            path : './logger',
+            spies: {
+                infoSpy,
+                debugSpy,
+                errorSpy
+            }
+        };
+
+        RouteBuilder = new Stubs.RouteBuilderStub({
+            RouteHandlerProxy: {
+                path       : './routeHandler',
+                LoggerProxy: loggerOptions
+            },
+            LoggerProxy      : loggerOptions
+        });
 
         router = {
             get   : handler,

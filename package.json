@@ -10,11 +10,15 @@
   "repository": "git://github.com/xogroup/toki",
   "keywords": [],
   "license": "BSD-3-Clause",
+  "engines": {
+    "node": ">=6.x.x"
+  },
   "bugs": {
     "url": "https://github.com/xogroup/toki/issues"
   },
   "homepage": "https://github.com/xogroup/toki#readme",
   "dependencies": {
+    "@toki/toki-logger": "0.0.3",
     "bluebird": "^3.4.7",
     "boom": "^4.2.0",
     "joi": "10.x"
