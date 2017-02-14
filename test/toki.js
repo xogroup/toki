@@ -6,13 +6,13 @@ const describe   = lab.describe;
 const beforeEach = lab.beforeEach;
 const it         = lab.it;
 
-const Code           = require('code');
-const expect         = Code.expect;
-const Sinon          = require('sinon');
-const Promise        = require('bluebird');
-const Exceptions     = require('../lib/exceptions');
-const Stubs          = require('./stubs').Toki;
-const ConfigStub     = require('./stubs').Configuration;
+const Code       = require('code');
+const expect     = Code.expect;
+const Sinon      = require('sinon');
+const Promise    = require('bluebird');
+const Exceptions = require('../lib/exceptions');
+const Stubs      = require('./stubs').Toki;
+const ConfigStub = require('./stubs').Configuration;
 
 describe('toki', () => {
 
@@ -116,7 +116,7 @@ describe('toki', () => {
         done();
     });
 
-    it.skip('should throw error when not installed config module', (done) => {
+    it('should throw error when not installed config module', (done) => {
 
         const options = {
             router: routerStub
@@ -139,7 +139,9 @@ describe('toki', () => {
         const config  = {};
         const stubs   = {
             ConfigurationProxy: {
-                TokiConfigProxy: config,
+                TokiConfigProxy: {
+                    config
+                },
                 path           : './internals/configuration',
                 LoggerProxy    : {
                     path : './logger',
@@ -210,7 +212,9 @@ describe('toki', () => {
         };
         const stubs       = {
             ConfigurationProxy: {
-                TokiConfigProxy: config,
+                TokiConfigProxy: {
+                    config
+                },
                 path           : './internals/configuration',
                 LoggerProxy
             },
@@ -352,7 +356,9 @@ describe('toki', () => {
         };
         const stubs       = {
             ConfigurationProxy: {
-                TokiConfigProxy: config,
+                TokiConfigProxy: {
+                    config
+                },
                 path           : './internals/configuration',
                 LoggerProxy
             },
@@ -519,7 +525,9 @@ describe('toki', () => {
         };
         const stubs       = {
             ConfigurationProxy: {
-                TokiConfigProxy: config,
+                TokiConfigProxy: {
+                    config
+                },
                 path           : './internals/configuration',
                 LoggerProxy
             },
@@ -751,7 +759,9 @@ describe('toki', () => {
         };
         const stubs       = {
             ConfigurationProxy: {
-                TokiConfigProxy: config,
+                TokiConfigProxy: {
+                    config
+                },
                 path           : './internals/configuration',
                 LoggerProxy
             },
@@ -818,14 +828,16 @@ describe('toki', () => {
                 errorSpy
             }
         };
-        const configStub = new ConfigStub.ConfigurationProxy({
-            TokiConfigProxy: config,
+        const configStub  = new ConfigStub.ConfigurationProxy({
+            TokiConfigProxy: {
+                config
+            },
             path           : './internals/configuration',
             LoggerProxy
         });
 
         const stubs = {
-            stubs : configStub,
+            stubs            : configStub,
             RouteBuilderProxy: {
                 path             : './internals/routeBuilder',
                 RouteHandlerProxy: {
@@ -835,10 +847,6 @@ describe('toki', () => {
                 LoggerProxy
             }
         };
-
-        // const configStub = Object.assign({},
-        //     new ConfigurationProxy(config),
-        //     new RouteBuilderProxy());
 
         Toki       = new TokiStub(stubs);
         const toki = new Toki(options);
@@ -850,7 +858,7 @@ describe('toki', () => {
             done();
         });
 
-        configStub.stub.tokiConfig.emit('config.changed');
+        configStub.stub.tokiConfig.stub.emit('config.changed');
     });
 
     it('should log debug/info', (done) => {

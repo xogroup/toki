@@ -1,4 +1,5 @@
 # toki
+> a configuration based orchestration rule engine with a growing ecosystem of modules and plugins that allows greater flexibility and support  of a myriad of technologies  
 
 <!-- Badges Go Here -->
 [![npm version](https://badge.fury.io/js/%40toki%2Ftoki.svg)](https://badge.fury.io/js/%40toki%2Ftoki)
@@ -17,11 +18,44 @@ Lead Maintainer: [Cesar Hernandez](https://github.com/cesarhq)
 npm install toki
 ```
 
+## Plugins
+
+### toki-logger
+
+### toki-config
+
+More on [toki-config](https://github.com/xogroup/toki-config)
+
+
+### toki-logger
+
+A logging interface that can be instantiated with any standard logging library. 
+__toki__ will require the toki-logger instance to log events and actions related to it's own lifecycle and request execution.
+
+```
+//setup logger
+const winston = require('winston');
+const TokiLogger = require('toki-logger');
+const logger = TokiLogger(winston);
+
+//setup 
+const toki = require('toki-hapi-bridge');
+
+```
+
+More on [toki-logger](https://github.com/xogroup/toki-logger)
+
 ## Usage
+
+
 
 ## API
 
 See the [API Reference](http://github.com/xogroup/toki/blob/master/API.md).
+
+### Examples
+
+Check out the [Examples](http://github.com/xogroup/toki/blob/master/Examples.md).
 
 ## Contributing
 

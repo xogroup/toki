@@ -122,7 +122,9 @@ describe('parallel action load tests', () => {
         };
         const stubs       = {
             ConfigurationProxy: {
-                TokiConfigProxy: config,
+                TokiConfigProxy: {
+                    config
+                },
                 path           : './internals/configuration',
                 LoggerProxy
             },
@@ -163,7 +165,8 @@ describe('parallel action load tests', () => {
     it('should handle ' + targetRequest + ' requests in ' + targetTime + ' ms',
         {
             timeout: targetTime
-        }, () => {
+        },
+        () => {
 
             return Promise.map(load, (item) => {
 

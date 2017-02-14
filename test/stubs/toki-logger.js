@@ -37,11 +37,22 @@ class TokiLoggerStub {
     }
 }
 
+class TokiLoggerInstance {
+
+    constructor(spies) {
+
+        return () => {
+
+            return new TokiLoggerStub(spies);
+        };
+    }
+}
+
 class TokiLoggerProxy {
 
     constructor(spies = {}) {
 
-        this[tokiLoggerName] = new TokiLoggerStub(spies);
+        this[tokiLoggerName] = new TokiLoggerInstance(spies);
     }
 }
 

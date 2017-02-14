@@ -2,14 +2,14 @@
 
 const Lab = require('lab');
 const lab = exports.lab = Lab.script();
-const describe = lab.describe;
-const beforeEach     = lab.beforeEach;
-const it       = lab.it;
+const describe   = lab.describe;
+const beforeEach = lab.beforeEach;
+const it         = lab.it;
 
-const Code            = require('code');
-const expect          = Code.expect;
-const Sinon           = require('sinon');
-const Stubs           = require('../stubs').Configuration;
+const Code   = require('code');
+const expect = Code.expect;
+const Sinon  = require('sinon');
+const Stubs  = require('../stubs').Configuration;
 
 describe('configuration tests', () => {
 
@@ -24,7 +24,9 @@ describe('configuration tests', () => {
         constructor(config) {
 
             const options = {
-                TokiConfigProxy: config,
+                TokiConfigProxy: {
+                    config
+                },
                 LoggerProxy    : {
                     path : './logger',
                     spies: {
@@ -47,16 +49,16 @@ describe('configuration tests', () => {
         done();
     });
 
-    // it('should succeed requiring toki-config', (done) => {
-    //
-    //     Configuration = require('../../lib/internals').configuration;
-    //
-    //     expect(() => {
-    //
-    //         return new Configuration();
-    //     }).to.not.throw();
-    //     done();
-    // });
+    it('should succeed requiring toki-config', (done) => {
+
+        Configuration = require('../../lib/internals').configuration;
+
+        expect(() => {
+
+            return new Configuration();
+        }).to.not.throw();
+        done();
+    });
 
     it('should create instance', (done) => {
 
@@ -365,6 +367,6 @@ describe('configuration tests', () => {
             done();
         });
 
-        Configuration.tokiConfig.emit(Configuration.constants.CONFIG_CHANGED_EVENT);
+        Configuration.tokiConfig.stub.emit(Configuration.constants.CONFIG_CHANGED_EVENT);
     });
 });

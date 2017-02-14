@@ -19,7 +19,7 @@ class TokiStub {
         }
 
         if (options.ConfigurationProxy) {
-            stubs = Object.assign(
+            stubs  = Object.assign(
                 stubs,
                 new Configuration.ConfigurationProxy(options.ConfigurationProxy));
         }

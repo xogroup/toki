@@ -21,6 +21,10 @@ describe('logger tests', () => {
 
     beforeEach((done) => {
 
+        infoSpy.reset();
+        debugSpy.reset();
+        errorSpy.reset();
+
         Logger = new Stubs.LoggerStub({
             path : '../../lib/internals/logger',
             spies: {
@@ -30,9 +34,6 @@ describe('logger tests', () => {
             }
         });
 
-        infoSpy.reset();
-        debugSpy.reset();
-        errorSpy.reset();
         done();
     });
 
@@ -55,7 +56,7 @@ describe('logger tests', () => {
         done();
     });
 
-    it('should logger be a singleton', (done) => {
+    it('should new Logger be a singleton', (done) => {
 
         const logger  = new Logger();
         const logger1 = new Logger();
@@ -66,7 +67,7 @@ describe('logger tests', () => {
         done();
     });
 
-    it('should logger be a singleton', (done) => {
+    it('should Logger.Instance be a singleton', (done) => {
 
         const logger  = new Logger();
         const logger1 = Logger.Instance;
@@ -85,9 +86,9 @@ describe('logger tests', () => {
         logger.debug('debug');
         logger.error('error');
 
-        expect(infoSpy.called).to.be.true();
-        expect(debugSpy.called).to.be.true();
-        expect(errorSpy.called).to.be.true();
+        expect(infoSpy.called).true();
+        expect(debugSpy.called).true();
+        expect(errorSpy.called).true();
         done();
     });
 });
