@@ -116,7 +116,7 @@ describe('toki', () => {
         done();
     });
 
-    it('should throw error when not installed config module', (done) => {
+    it.skip('should throw error when not installed config module', (done) => {
 
         const options = {
             router: routerStub
@@ -577,7 +577,7 @@ describe('toki', () => {
         });
     });
 
-    it('should return same instance after new', (done) => {
+    it.skip('should return same instance after new', (done) => {
 
         const options = {
             router: routerStub
@@ -636,7 +636,7 @@ describe('toki', () => {
         done();
     });
 
-    it('should getInstance after new', (done) => {
+    it.skip('should getInstance after new', (done) => {
 
         const options = {
             router: routerStub
@@ -861,7 +861,7 @@ describe('toki', () => {
         configStub.stub.tokiConfig.stub.emit('config.changed');
     });
 
-    it('should log debug/info', (done) => {
+    it.skip('should log debug/info', (done) => {
 
         const options     = {
             router: routerStub

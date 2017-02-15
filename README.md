@@ -2,7 +2,7 @@
 > a configuration based orchestration rule engine with a growing ecosystem of modules and plugins that allows greater flexibility and support  of a myriad of technologies  
 
 <!-- Badges Go Here -->
-[![npm version](https://badge.fury.io/js/%40toki%2Ftoki.svg)](https://badge.fury.io/js/%40toki%2Ftoki)
+[![npm version](https://badge.fury.io/js/toki.svg)](https://badge.fury.io/js/toki)
 [![Build Status](https://travis-ci.org/xogroup/toki.svg?branch=master)](https://travis-ci.org/xogroup/toki)
 [![Known Vulnerabilities](https://snyk.io/test/github/xogroup/toki/badge.svg)](https://snyk.io/test/github/xogroup/toki)
 [![NSP Status](https://nodesecurity.io/orgs/xo-group/projects/ce9f9a2f-7ab5-4b13-ab8d-a3401eb0c00f/badge)](https://nodesecurity.io/orgs/xo-group/projects/ce9f9a2f-7ab5-4b13-ab8d-a3401eb0c00f)
@@ -12,35 +12,45 @@ Lead Maintainer: [Cesar Hernandez](https://github.com/cesarhq)
 ## Introduction
 
 
-
 ## Installation
 ```
 npm install toki
 ```
 
-## Plugins
+## API
 
-### toki-logger
+See the [API Reference](http://github.com/xogroup/toki/blob/master/API.md).
+
+## Dependencies
+
+### toki-[webserver]-bridge
+
+
+[toki-hapi-bridge](https://github.com/xogroup/toki-hapi-bridge) 
 
 ### toki-config
+
+Main interface to obtain rules configuration to be executed by __toki__. 
 
 More on [toki-config](https://github.com/xogroup/toki-config)
 
 
 ### toki-logger
 
-A logging interface that can be instantiated with any standard logging library. 
-__toki__ will require the toki-logger instance to log events and actions related to it's own lifecycle and request execution.
+A logging interface that can be instantiated beforehand with any standard logging library. 
+__toki__ will require the toki-logger instance to log events and actions related to it's own lifecycle and request/rule execution.
 
-```
+```Javascript
 //setup logger
 const winston = require('winston');
 const TokiLogger = require('toki-logger');
 const logger = TokiLogger(winston);
 
-//setup 
-const toki = require('toki-hapi-bridge');
+....
 
+//setup toki
+const Toki = require('toki');
+const toki = new Toki();
 ```
 
 More on [toki-logger](https://github.com/xogroup/toki-logger)
@@ -49,9 +59,6 @@ More on [toki-logger](https://github.com/xogroup/toki-logger)
 
 
 
-## API
-
-See the [API Reference](http://github.com/xogroup/toki/blob/master/API.md).
 
 ### Examples
 
