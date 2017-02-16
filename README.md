@@ -11,6 +11,12 @@ Lead Maintainer: [Cesar Hernandez](https://github.com/cesarhq)
 
 ## Introduction
 
+Everybody is riding the hype around **Microservices Architecture**, which makes sense until you realize you end up with several microservices that need to be coordinated to fulfil your business requirements.
+  
+Enter __toki__ and it's ecosystem of modules/plugins which was born on the aforementioned necessity
+ 
+ 
+
 
 ## Installation
 ```
@@ -23,14 +29,24 @@ See the [API Reference](http://github.com/xogroup/toki/blob/master/API.md).
 
 ## Dependencies
 
-### toki-[webserver]-bridge
-
-
-[toki-hapi-bridge](https://github.com/xogroup/toki-hapi-bridge) 
-
 ### toki-config
 
-Main interface to obtain rules configuration to be executed by __toki__. 
+Main interface to obtain rules configuration to be executed by __toki__.  
+
+```Javascript
+//setup logger
+const TokiConfig = require('toki-cofig');
+//
+const tokiConfig = new TokiConfig({
+    'toki-config-file' : {
+        path : './config.json'
+    }
+});
+
+//setup toki
+const Toki = require('toki');
+const toki = new Toki();
+```
 
 More on [toki-config](https://github.com/xogroup/toki-config)
 
@@ -45,8 +61,6 @@ __toki__ will require the toki-logger instance to log events and actions related
 const winston = require('winston');
 const TokiLogger = require('toki-logger');
 const logger = TokiLogger(winston);
-
-....
 
 //setup toki
 const Toki = require('toki');

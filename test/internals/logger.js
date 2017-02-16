@@ -37,7 +37,7 @@ describe('logger tests', () => {
         done();
     });
 
-    it('should succeed requiring toki-logger', (done) => {
+    it('should succeed instantiating logger', (done) => {
 
         Logger = require('../../lib/internals').logger;
 
