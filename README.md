@@ -39,9 +39,9 @@ See the [API Reference](http://github.com/xogroup/toki/blob/master/API.md).
 Main interface to obtain rules configuration to be executed by __toki__.  
 
 ```Javascript
-//setup logger
+//setup config
 const TokiConfig = require('toki-cofig');
-//
+//I need file based config based
 const tokiConfig = new TokiConfig({
     'toki-config-file' : {
         path : './config.json'
@@ -76,8 +76,37 @@ More on [toki-logger](https://github.com/xogroup/toki-logger).
 
 ## Usage
 
+Code wise there's not a lot todo in regards to __toki__. The main concerns for you would be:
 
+- put together your configuration as per [toki configuration](./RULESENGINE.md#configuration)
 
+- build your action handler as per [toki action handler](./RULESENGINE.md#how-to-implement-my-very-own-action-handler) listed steps
+
+- setup __toki__ dependencies
+
+- require and new __toki__
+
+- sit back and relax skynet err.. __toki__ is at the wheel
+
+```Javascript
+//setup config
+const TokiConfig = require('toki-cofig');
+//I need file based config based
+const tokiConfig = new TokiConfig({
+    'toki-config-file' : {
+        path : './config.json'
+    }
+});
+
+//setup logger
+const winston = require('winston');
+const TokiLogger = require('toki-logger');
+const logger = TokiLogger(winston);
+
+//setup toki
+const Toki = require('toki');
+const toki = new Toki();
+```
 
 ### Examples
 

@@ -14,6 +14,8 @@
 - [how to implement my very own action handler](#how-to-implement-my-very-own-action-handler)
   - [execution context](#execution-context)
   - [action handler](#action-handler)
+    - [returning an object](#returning-an-object)
+    - [returning a promise](#returning-a-promise)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -222,7 +224,7 @@ Clear as mud right? this code example will be crystal clear to our nerdy readers
              },
              {                    
                  "name": "map",
-                 "type": "product-lookup",
+                 "type": "product-map",
                  "description" : "compose reponse payload with product description and inventory"                 
              }                         
          ]
@@ -307,7 +309,11 @@ module.exports = function(context) {
 
 ### action handler
 
-An action handler it's just a fancy name for a node module that exports a function that either returns a value or a promise that fullfils into a value, simple as that.
+An action handler it's just a fancy name for a node module that exports a function that either returns a value or a promise that fulfills into a value, simple as that.
+
+**NOTE** do not handle exceptions in you action handler as __toki__ will give you a freebie and handle it for you
+ 
+ #### returning an object
  
 ```javascript
 module.exports = function(context) {
@@ -329,6 +335,8 @@ module.exports = function(context) {
 }
 ```
 
+ #### returning a promise
+ 
 ```javascript
 //we all love bluebird
 const Promise = require('bluebird');
@@ -346,3 +354,11 @@ module.exports = function(context) {
         });
 }
 ```
+
+### error handling
+
+When fulfilling a route request __toki__ will guard against uncuaght errors and will fail gracefuly sending a [BOOM 500 error](https://github.com/hapijs/boom#boombadimplementationmessage-data---alias-internal).
+
+As a general rule avoid handling errors in your action handler unless that's part of your business logic, don't turn down the freebie __toki__ gives you/
+
+
