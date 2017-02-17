@@ -1,3 +1,22 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [toki](#toki)
+  - [Introduction](#introduction)
+    - [Key Features](#key-features)
+  - [Installation](#installation)
+  - [API](#api)
+  - [Dependencies](#dependencies)
+    - [toki-config](#toki-config)
+    - [toki-logger](#toki-logger)
+  - [Usage](#usage)
+    - [Examples](#examples)
+  - [Contributing](#contributing)
+  - [Setting up for development](#setting-up-for-development)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # toki
 > a configuration based orchestration rule engine with a growing ecosystem of modules and plugins that allows greater flexibility and support  of a myriad of technologies.  
 

@@ -16,6 +16,7 @@
   - [action handler](#action-handler)
     - [returning an object](#returning-an-object)
     - [returning a promise](#returning-a-promise)
+  - [error handling](#error-handling)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 

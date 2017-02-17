@@ -1,11 +1,21 @@
 # Examples
 
+Here's a BIG BEAUTIFUL example showing all __toki__ pieces working together. BIGLY! 
+
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-Here's a BIG BEAUTIFUL example showing all __toki__ pieces working together. BIGLY! 
+- [myapp.js](#myappjs)
+- [myConfig.json](#myconfigjson)
+- [product-lookup module](#product-lookup-module)
+- [inventory-lookup-location-central module](#inventory-lookup-location-central-module)
+- [inventory-lookup-location-east module](#inventory-lookup-location-east-module)
+- [inventory-lookup-location-west module](#inventory-lookup-location-west-module)
+- [product-backorder module](#product-backorder-module)
+- [product-map module](#product-map-module)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ### myapp.js
 
