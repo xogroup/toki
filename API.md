@@ -19,11 +19,11 @@
 
 ### new Toki(options)
 
-Creates a singleton instance of __toki__ and starts the bootstraping process
+Creates a singleton instance of __toki__ and starts the bootstrapping process.
 
-- `options` - required object
+- `options` - required object.
 
-    - `router` - required __toki-bridge__ router object to be setup witt configured routes
+    - `router` - required __toki-bridge__ router object to be setup with configured routes.
 
 
 ```javascript
@@ -35,11 +35,9 @@ const toki = new Toki({
 ```
 
 ### getInstance()
-[static method](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/static)
+[static method](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/static) - If a __toki__ instance was already created with `new Toki` it will return that instance otherwise will throw an error.
 
-If a __toki__ instance was already created with `new Toki` it will return that instance otherwise will throw an error
-
-happy path : 
+happy path: 
 
 ```javascript
 const bridge = require('toki-hapi-bridge');
@@ -68,7 +66,7 @@ const notMyToki = Toki.getInstance();
 
 #### ready
 
-Once __toki__ has been instantiated it will immediately require __toki-config__ to retrieve the configuration and prepare itself to configure routes and action handlers
+Once __toki__ has been instantiated it will immediately require __toki-config__ to retrieve the configuration and prepare itself to configure routes and action handlers.
 
 ```Javascript
 //intantiate toki
@@ -86,10 +84,10 @@ toki.on('ready', ()=>{
 
 #### error
 
-Fired if any error ocurred during the initialization phase 
+Fired if any error occurred during the initialization phase. 
 
 ```Javascript
-//intantiate toki
+//instantiate toki
 const Toki = require('toki');
 const toki = new Toki({
     router : routerInstance

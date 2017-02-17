@@ -1,5 +1,5 @@
 # toki
-> a configuration based orchestration rule engine with a growing ecosystem of modules and plugins that allows greater flexibility and support  of a myriad of technologies  
+> a configuration based orchestration rule engine with a growing ecosystem of modules and plugins that allows greater flexibility and support  of a myriad of technologies.  
 
 <!-- Badges Go Here -->
 [![npm version](https://badge.fury.io/js/toki.svg)](https://badge.fury.io/js/toki)
@@ -13,12 +13,17 @@ Lead Maintainer: [Cesar Hernandez](https://github.com/cesarhq)
 
 Everybody is riding the hype around **Microservices Architecture**, which makes sense until you realize you end up with several microservices that need to be coordinated to fulfil your business requirements.
   
-Enter __toki__ and it's ecosystem of modules/plugins which was born on the aforementioned necessity
+Enter __toki__ and it's ecosystem of modules/plugins which was born on the aforementioned necessity.
  
  
+### Key Features
 
+- __Configuration based__, bring your own modules implemeting your own business logic, install them, add them to the configuration an watch do their thing.
+ 
+- __Web servers__, by using the different __toki-bride__ implementations you can use your favorite web server and integrate __toki__ into it.
 
 ## Installation
+
 ```
 npm install toki
 ```
@@ -48,7 +53,7 @@ const Toki = require('toki');
 const toki = new Toki();
 ```
 
-More on [toki-config](https://github.com/xogroup/toki-config)
+More on [toki-config](https://github.com/xogroup/toki-config).
 
 
 ### toki-logger
@@ -67,7 +72,7 @@ const Toki = require('toki');
 const toki = new Toki();
 ```
 
-More on [toki-logger](https://github.com/xogroup/toki-logger)
+More on [toki-logger](https://github.com/xogroup/toki-logger).
 
 ## Usage
 
