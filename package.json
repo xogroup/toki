@@ -5,7 +5,8 @@
   "main": "lib/index.js",
   "scripts": {
     "test": "lab -c test",
-    "test-cover": "lab -c -r html > test/test.html && open test/test.html"
+    "test-cover": "lab -c -r html > test/test.html && open test/test.html",
+    "doctoc": "doctoc API.md && doctoc Examples.md && doctoc RULESENGINE.md"
   },
   "repository": "git://github.com/xogroup/toki",
   "keywords": [],
@@ -26,6 +27,7 @@
   },
   "devDependencies": {
     "code": "4.x",
+    "doctoc": "^1.2.0",
     "lab": "12.x",
     "proxyquire": "^1.7.11",
     "sinon": "^1.17.7"
