@@ -1,6 +1,6 @@
 # Examples
 
-Here's a BIG BEAUTIFUL example showing all __toki__ pieces working together. BIGLY! 
+Here's a BIG BEAUTIFUL example showing all __toki__ pieces working together.
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
@@ -216,5 +216,3 @@ module.exports = function(context){
     });
 };
 ```
-
-I need a drink after writing all this and you too if you made it this far reading it.

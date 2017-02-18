@@ -1,24 +1,5 @@
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
-
-- [toki](#toki)
-  - [Introduction](#introduction)
-    - [Key Features](#key-features)
-  - [Installation](#installation)
-  - [API](#api)
-  - [Dependencies](#dependencies)
-    - [toki-config](#toki-config)
-    - [toki-logger](#toki-logger)
-  - [Usage](#usage)
-    - [Examples](#examples)
-  - [Contributing](#contributing)
-  - [Setting up for development](#setting-up-for-development)
-
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
-
 # toki
-> a configuration based orchestration rule engine with a growing ecosystem of modules and plugins that allows greater flexibility and support  of a myriad of technologies.  
+A configuration based orchestration rules engine with support for custom plugins.  
 
 <!-- Badges Go Here -->
 [![npm version](https://badge.fury.io/js/toki.svg)](https://badge.fury.io/js/toki)
@@ -30,9 +11,9 @@ Lead Maintainer: [Cesar Hernandez](https://github.com/cesarhq)
 
 ## Introduction
 
-Everybody is riding the hype around **Microservices Architecture**, which makes sense until you realize you end up with several microservices that need to be coordinated to fulfil your business requirements.
+Everybody is riding the hype around **Microservices Architecture**, which makes sense until you realize you end up with several microservices that need to be coordinated to fulfill your business requirements.
   
-Enter __toki__ and it's ecosystem of modules/plugins which was born on the aforementioned necessity.
+Enter __toki__ and its ecosystem of modules/plugins which was born from the aforementioned necessity.
  
  
 ### Key Features
