@@ -314,7 +314,7 @@ An action handler it's just a fancy name for a node module that exports a functi
 
 **NOTE** do not handle exceptions in you action handler as __toki__ will give you a freebie and handle it for you
  
- #### returning an object
+#### returning an object
  
 ```javascript
 module.exports = function(context) {
@@ -336,7 +336,7 @@ module.exports = function(context) {
 }
 ```
 
- #### returning a promise
+#### returning a promise
  
 ```javascript
 //we all love bluebird
