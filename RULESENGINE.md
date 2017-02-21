@@ -158,10 +158,10 @@ An array of [action](#action) to be executed in sequential order.
              {                    
                  "name": "inventory",
                  "type": "inventory-lookup",
-                 "description" : "lookup product inventory"                 
+                 "description" : "lookup product inventory",               
                  "options" : {
                     "url" : "http://inventory/",
-                    "locations" : ["East", "West", "Central"}]
+                    "locations" : ["East", "West", "Central"]
                  }
              },
              {                    
