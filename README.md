@@ -5,7 +5,7 @@ A configuration based orchestration rules engine with support for custom plugins
 [![npm version](https://badge.fury.io/js/toki.svg)](https://badge.fury.io/js/toki)
 [![Build Status](https://travis-ci.org/xogroup/toki.svg?branch=master)](https://travis-ci.org/xogroup/toki)
 [![Known Vulnerabilities](https://snyk.io/test/github/xogroup/toki/badge.svg)](https://snyk.io/test/github/xogroup/toki)
-[![NSP Status](https://nodesecurity.io/orgs/xo-group/projects/ce9f9a2f-7ab5-4b13-ab8d-a3401eb0c00f/badge)](https://nodesecurity.io/orgs/xo-group/projects/ce9f9a2f-7ab5-4b13-ab8d-a3401eb0c00f)
+[![NSP Status](https://nodesecurity.io/orgs/xo-group/projects/033de8be-f1dc-447b-98fd-09fbab416886/badge)](https://nodesecurity.io/orgs/xo-group/projects/033de8be-f1dc-447b-98fd-09fbab416886)
 
 Lead Maintainer: [Cesar Hernandez](https://github.com/cesarhq)
 
