@@ -150,12 +150,19 @@ An array of [action](#action) to be executed in sequential order.
              {                    
                  "name": "product",
                  "type": "product-lookup",
-                 "description" : "lookup product catalog"
+                 "description" : "lookup product catalog",
+                 "options" : {
+                    "url" : "http://product/"
+                 }
              },
              {                    
                  "name": "inventory",
                  "type": "inventory-lookup",
                  "description" : "lookup product inventory"                 
+                 "options" : {
+                    "url" : "http://inventory/",
+                    "locations" : ["East", "West", "Central"}]
+                 }
              },
              {                    
                  "name": "backorder",
@@ -178,9 +185,11 @@ An array of [action](#action) to be executed in sequential order.
 3. action `backorder` executes and has access to `this['product']` and `this['inventory']`, it's own result gets bounded to [execution context](#xecution-context) as `this['backorder']`.
 4. action `map` executes and access all previous results `this['product']`, `this['inventory']`, `this['backorder']`, and combines them into an new object that will be passed to `this.resppnse(newObj)` to be sent back to a happy client.
 
-- `type` - this determines the [action handler](#action-handler) node moudle to be required and invoked as part of the execution.
+- `type` - this determines the [action handler](#action-handler) node module to be required and invoked as part of the execution.
 
 - `description` - write something nice about your action.
+
+- `options` - optional. Configuration object to be passed to the action executor.
 
 ### parallel actions
 
@@ -248,20 +257,20 @@ __toki__ uses the following [joi](https://github.com/hapijs/joi) schema to valid
 const action  = Joi.object().keys({
     name       : Joi.string(),
     type       : Joi.string(),
-    description: Joi.string().optional()
+    description: Joi.string().optional().allow(null, ''),
+    options    : Joi.object().optional().allow(null)
 });
 const actions = Joi.array().items(action).min(2);
 const routes  = Joi.object().keys({
     path       : Joi.string(),
     httpAction : Joi.string().valid('GET', 'POST', 'PUT', 'DELETE', 'PATCH'),
     tags       : Joi.array().items(Joi.string()).min(1).optional(),
-    description: Joi.string().optional(),
+    description: Joi.string().optional().allow(null, ''),
     actions    : Joi.array().items(action, actions).min(1)
 });
-const schema =  Joi.object().keys({
+const schema  = Joi.object().keys({
     routes: Joi.array().items(routes).min(1)
 }).label('toki configuration');
-
 ```
 
 

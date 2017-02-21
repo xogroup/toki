@@ -577,6 +577,135 @@ describe('toki', () => {
         });
     });
 
+    it('should get a toki instance and take action options', (done) => {
+
+        const routerGet = Sinon.spy();
+        let route1Handler;
+
+        router.get = function(url, handler) {
+
+            routerGet(url);
+            route1Handler = handler;
+        };
+
+        const options     = {
+            router
+        };
+        const config      = {
+            routes: [
+                {
+                    path      : 'route1',
+                    httpAction: 'GET',
+                    actions   : [
+                        {
+                            name   : 'action1',
+                            type   : 'action-handler1',
+                            options: {}
+                        },
+                        {
+                            name   : 'action2',
+                            type   : 'action-handler2',
+                            options: null
+                        },
+                        {
+                            name   : 'action3',
+                            type   : 'action-handler3',
+                            options: {
+                                key: 'value'
+                            }
+                        },
+                        {
+                            name     : 'action4',
+                            type     : 'action-handler4',
+                            myOptions: {}
+                        }
+                    ]
+                }
+            ]
+        };
+        const actionStubs = {
+            'action-handler1': function(args) {
+
+                action1Spy(args.action);
+            },
+            'action-handler2': function(args) {
+
+                action2Spy(args.action);
+            },
+            'action-handler3': function(args) {
+
+                action3Spy(args.action);
+            },
+            'action-handler4': function(args) {
+
+                action4Spy(args.action);
+            }
+        };
+        const LoggerProxy = {
+            path : './logger',
+            spies: {
+                infoSpy,
+                debugSpy,
+                errorSpy
+            }
+        };
+        const stubs       = {
+            ConfigurationProxy: {
+                TokiConfigProxy: {
+                    config
+                },
+                path           : './internals/configuration',
+                LoggerProxy
+            },
+            RouteBuilderProxy : {
+                path             : './internals/routeBuilder',
+                RouteHandlerProxy: {
+                    stubs: actionStubs,
+                    path : './routeHandler',
+                    LoggerProxy
+                },
+                LoggerProxy
+            }
+        };
+
+        Toki       = new TokiStub(stubs);
+        const toki = new Toki(options);
+
+        expect(toki).to.be.an.object();
+
+        toki.on(Toki.constants.READY_EVENT, () => {
+
+            expect(routerGet.calledOnce).to.be.true();
+            expect(routerGet.calledWith('route1')).true();
+
+            return route1Handler({}, {})
+                .then(
+                    () => {
+
+                        expect(action1Spy.called).true();
+                        const args1 = action1Spy.args[0][0];
+                        expect(args1.options).to.exist().and.be.object().and.equal({});
+
+                        expect(action2Spy.called).true();
+                        const args2 = action2Spy.args[0][0];
+                        expect(args2.options).to.be.null();
+
+                        expect(action3Spy.called).true();
+                        const args3 = action3Spy.args[0][0];
+                        expect(args3.options).to.exist().and.be.object().and.equal({
+                            key: 'value'
+                        });
+
+                        expect(action4Spy.called).true();
+                        const args4 = action4Spy.args[0][0];
+                        expect(args4.options).to.not.exist();
+                        expect(args4.myOptions).to.exist();
+
+                    }
+                ).then(done);
+        });
+    });
+
     it('should return same instance after new', (done) => {
 
         const options = {
