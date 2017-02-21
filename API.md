@@ -11,6 +11,9 @@
     - [ready](#ready)
     - [error](#error)
     - [config.changed](#configchanged)
+  - [Contracts](#contracts)
+    - [Request](#request)
+    - [Response](#response)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -37,7 +40,7 @@ const toki = new Toki({
 ### getInstance()
 [static method](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/static) - If a __toki__ instance was already created with `new Toki` it will return that instance otherwise will throw an error.
 
-happy path: 
+happy path:
 
 ```javascript
 const bridge = require('toki-hapi-bridge');
@@ -84,7 +87,7 @@ toki.on('ready', ()=>{
 
 #### error
 
-Fired if any error occurred during the initialization phase. 
+Fired if any error occurred during the initialization phase.
 
 ```Javascript
 //instantiate toki
@@ -102,10 +105,10 @@ toki.on('error', (error)=>{
 
 #### config.changed
 
-__toki__ subscribes to events triggered by __toki-config__ if the underlaying configuration mechanism detects a configuration change. __toki__ will bubble up the event for the __toki__ instantiatior to act accordingly in response to the event. 
+__toki__ subscribes to events triggered by __toki-config__ if the underlaying configuration mechanism detects a configuration change. __toki__ will bubble up the event for the __toki__ instantiatior to act accordingly in response to the event.
 
 ```Javascript
-//intantiate toki
+//instantiate toki
 const Toki = require('toki');
 const toki = new Toki({
     router : routerInstance
@@ -113,7 +116,32 @@ const toki = new Toki({
 
 //wait for toki to be ready
 toki.on('config.changed', ()=>{
-    //toki is open for buisness (aka do your thing)    
+    //toki is open for business (aka do your thing)    
 });
 
 ```
+
+### Contracts
+_Fulfilled by the Bridge_
+
+These contracts supply a minimum. Additional properties or methods may exist, but should not be used since requests and responses provided by the bridge are often decorated versions of underlying requests or responses.
+
+#### Request
+
+Request is a decorated version of the Node http-server request object. It will always have the following:
+
++ `request.query` - a parsed query object
++ `request.params` - an object of any params from passed paths
++ `request.path` - the current path
++ `request.method` - the method which called this request
++ `request.headers` - an object containing all headers
+
+
+#### Response
+
+Response is an object which allows you to send data back to the client as well as set status codes, headers and return errors.
+
++ `response.send(payload)` where payload is a string, an object or a promise. If payload is an instance of error, it'll be sent to response.error().
++ `response.error(error)` where payload is an instance of error will send back a default status code as well as show the error.
++ `response.code(status)` where status is a number will send back that statusCode. It can be called before or after send().
++ `response.header(name, value)` will set the named header to the new value. It can be called before or after send().
