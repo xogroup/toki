@@ -8,12 +8,12 @@ Here's a BIG BEAUTIFUL example showing all __toki__ pieces working together.
 
 - [myapp.js](#myappjs)
 - [myConfig.json](#myconfigjson)
-- [product-lookup module](#product-lookup-module)
-- [inventory-lookup-location-central module](#inventory-lookup-location-central-module)
-- [inventory-lookup-location-east module](#inventory-lookup-location-east-module)
-- [inventory-lookup-location-west module](#inventory-lookup-location-west-module)
-- [product-backorder module](#product-backorder-module)
-- [product-map module](#product-map-module)
+- [toki-method-product-lookup module](#toki-method-product-lookup-module)
+- [toki-method-inventory-lookup-central module](#toki-method-inventory-lookup-central-module)
+- [toki-method-inventory-lookup-east module](#toki-method-inventory-lookup-east-module)
+- [toki-method-inventory-lookup-west module](#toki-method-inventory-lookup-west-module)
+- [toki-method-product-backorder module](#toki-method-product-backorder-module)
+- [toki-method-product-map module](#toki-method-product-map-module)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -59,34 +59,34 @@ const toki = new Toki({
          "actions"   : [
              {                    
                  "name": "product",
-                 "type": "product-lookup",
+                 "type": "toki-method-product-lookup",
                  "description" : "lookup product catalog"
              },
              [
                  {                    
                      "name": "inventory-central",
-                     "type": "inventory-lookup-location-central",
+                     "type": "toki-method-inventory-lookup-central",
                      "description" : "lookup product inventory in central region"                 
                  },
                  {                    
                      "name": "inventory-east",
-                     "type": "inventory-lookup-location-east",
+                     "type": "toki-method-inventory-lookup-east",
                      "description" : "lookup product inventory in east region"                 
                  },
                  {                    
                      "name": "inventory-west",
-                     "type": "inventory-lookup-location-west",
+                     "type": "toki-method-inventory-lookup-west",
                      "description" : "lookup product inventory in west region"                 
                  }
              ], 
              {                    
                  "name": "backorder",
-                 "type": "product-backorder",
+                 "type": "toki-method-product-backorder",
                  "description" : "check if product inventory is below limit and initiate backorder"                 
              },
              {                    
                  "name": "map",
-                 "type": "product-map",
+                 "type": "toki-method-product-map",
                  "description" : "compose reponse payload with product description and inventory"                 
              }                         
          ]
@@ -96,7 +96,7 @@ const toki = new Toki({
 ```
 
 
-### product-lookup module
+### toki-method-product-lookup module
 
 ```javascript
 module.exports = function(context){
@@ -114,7 +114,7 @@ module.exports = function(context){
     //let error bubble up do NOT catch toki will handle it for you    
 };
 ```
-### inventory-lookup-location-central module
+### toki-method-inventory-lookup-central module
 
 ```javascript
 module.exports = function(context){
@@ -134,7 +134,7 @@ module.exports = function(context){
 };
 ```
 
-### inventory-lookup-location-east module
+### toki-method-inventory-lookup-east module
 
 ```javascript
 module.exports = function(context){
@@ -154,7 +154,7 @@ module.exports = function(context){
 };
 ```
 
-### inventory-lookup-location-west module
+### toki-method-inventory-lookup-west module
 
 ```javascript
 module.exports = function(context){
@@ -174,7 +174,7 @@ module.exports = function(context){
 };
 ```
 
-### product-backorder module
+### toki-method-product-backorder module
 
 ```javascript
 module.exports = function(context){
@@ -204,7 +204,7 @@ module.exports = function(context){
 };
 ```
 
-### product-map module
+### toki-method-product-map module
 
 ```javascript
 module.exports = function(context){

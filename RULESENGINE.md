@@ -37,11 +37,11 @@ let's take a look at the different pieces that make a toki configuration.
          "actions"   : [
              {                    
                  "name": "product",
-                 "type": "product-lookup"
+                 "type": "toki-method-product-lookup"
              },
              {
                  "name": "inventory",
-                 "type": "inventory-lookup"
+                 "type": "toki-method-inventory-lookup"
              }
          ]
      }
@@ -77,7 +77,7 @@ An array of [route](#route) objects.
          "actions"   : [
              {                    
                  "name": "product",
-                 "type": "product-lookup"
+                 "type": "toki-method-product-lookup"
              }
          ]
      },
@@ -88,7 +88,7 @@ An array of [route](#route) objects.
          "actions"   : [
              {                    
                  "name": "product",
-                 "type": "product-create"
+                 "type": "toki-method-product-create"
              }         
          ]     
      }
@@ -110,22 +110,22 @@ An array of [action](#action) to be executed in sequential order.
          "actions"   : [
              {                    
                  "name": "product",
-                 "type": "product-lookup",
+                 "type": "toki-method-product-lookup",
                  "description" : "lookup product catalog"
              },
              {                    
                  "name": "inventory",
-                 "type": "inventory-lookup",
+                 "type": "toki-method-inventory-lookup",
                  "description" : "lookup product inventory"                 
              },
              {                    
                  "name": "backorder",
-                 "type": "product-backorder",
+                 "type": "toki-method-product-backorder",
                  "description" : "check if product inventory is below limit and initiate backorder"                 
              }, 
              {                    
                  "name": "map",
-                 "type": "product-lookup",
+                 "type": "toki-method-product-lookup",
                  "description" : "compose reponse payload with product description and inventory"                 
              }                         
          ]
@@ -149,7 +149,7 @@ An array of [action](#action) to be executed in sequential order.
          "actions"   : [
              {                    
                  "name": "product",
-                 "type": "product-lookup",
+                 "type": "toki-method-product-lookup",
                  "description" : "lookup product catalog",
                  "options" : {
                     "url" : "http://product/"
@@ -157,7 +157,7 @@ An array of [action](#action) to be executed in sequential order.
              },
              {                    
                  "name": "inventory",
-                 "type": "inventory-lookup",
+                 "type": "toki-method-inventory-lookup",
                  "description" : "lookup product inventory",               
                  "options" : {
                     "url" : "http://inventory/",
@@ -166,17 +166,17 @@ An array of [action](#action) to be executed in sequential order.
              },
              {                    
                  "name": "backorder",
-                 "type": "product-backorder",
+                 "type": "toki-method-product-backorder",
                  "description" : "check if product inventory is below limit and initiate backorder"                 
              }, 
              {                    
                  "name": "map",
-                 "type": "product-lookup",
+                 "type": "toki-method-product-lookup",
                  "description" : "compose reponse payload with product description and inventory"                 
              }                         
          ]
      }
-  ]
+ ]
 }
  ```
 
@@ -186,6 +186,32 @@ An array of [action](#action) to be executed in sequential order.
 4. action `map` executes and access all previous results `this['product']`, `this['inventory']`, `this['backorder']`, and combines them into an new object that will be passed to `this.resppnse(newObj)` to be sent back to a happy client.
 
 - `type` - this determines the [action handler](#action-handler) node module to be required and invoked as part of the execution.
+
+`type` is free form but we suggest our standard naming convention of pre-appending `toki-method-` to your action handler name. 
+
+ ```json
+{
+ "routes": [
+     {
+         "path"      : "/products/{id}",
+         "httpAction": "GET",
+         "actions"   : [
+             {                    
+                 "name": "product",
+                 "type": "toki-method-product-lookup",
+                 "description" : "lookup product catalog",
+                 "options" : {
+                    "url" : "http://product/"
+                 }
+             }             
+         ]
+     }
+  ]
+}
+```
+
+On the previous configuration `toki-method-product-lookup` will be invoked as `require('toki-method-product-lookup')`
+
 
 - `description` - write something nice about your action.
 
@@ -207,34 +233,34 @@ Clear as mud right? this code example will be crystal clear to our nerdy readers
          "actions"   : [
              {                    
                  "name": "product",
-                 "type": "product-lookup",
+                 "type": "toki-method-product-lookup",
                  "description" : "lookup product catalog"
              },
              [
                  {                    
                      "name": "inventory-central",
-                     "type": "inventory-lookup-location-central",
+                     "type": "toki-method-inventory-lookup-location-central",
                      "description" : "lookup product inventory in central region"                 
                  },
                  {                    
                      "name": "inventory-east",
-                     "type": "inventory-lookup-location-east",
+                     "type": "toki-method-inventory-lookup-location-east",
                      "description" : "lookup product inventory in east region"                 
                  },
                  {                    
                      "name": "inventory-west",
-                     "type": "inventory-lookup-location-west",
+                     "type": "toki-method-inventory-lookup-location-west",
                      "description" : "lookup product inventory in west region"                 
                  }
              ], 
              {                    
                  "name": "backorder",
-                 "type": "product-backorder",
+                 "type": "toki-method-product-backorder",
                  "description" : "check if product inventory is below limit and initiate backorder"                 
              },
              {                    
                  "name": "map",
-                 "type": "product-map",
+                 "type": "toki-method-product-map",
                  "description" : "compose reponse payload with product description and inventory"                 
              }                         
          ]
@@ -292,7 +318,7 @@ Before we get to the advanced stuff we need to define what the execution context
 {
     "action" : {                    
         "name": "inventory-central",
-        "type": "inventory-lookup-location-central",
+        "type": "toki-method-inventory-lookup-location-central",
         "description" : "lookup product inventory in central region"                 
     },
     "request" : {},
@@ -321,7 +347,45 @@ module.exports = function(context) {
 
 An action handler it's just a fancy name for a node module that exports a function that either returns a value or a promise that fulfills into a value, simple as that.
 
-**NOTE** do not handle exceptions in you action handler as __toki__ will give you a freebie and handle it for you
+Our standard naming convention for an action action handler is prefixing it with `toki-method-` but thjs is not enforced by __toki__. 
+
+**NOTES** 
+
+- do not make your action handler need instantiation by `new`.
+
+- do not handle exceptions in you action handler as __toki__ will give you a freebie and handle it for you.
+
+Sample config
+ 
+ ```json
+{
+ "routes": [
+     {
+         "path"      : "/products/{id}",
+         "httpAction": "GET",
+         "actions"   : [
+             {                    
+                 "name": "product",
+                 "type": "toki-method-product-lookup",
+                 "description" : "lookup product catalog",
+                 "options" : {
+                    "url" : "http://product/"
+                 }
+             }             
+         ]
+     }
+  ]
+}
+```
+ 
+ `toki-method-product-lookup` module will be required as
+ 
+ ```javascript
+
+//require without instantiation
+const actionHandler = require('toki-method-product-lookup');
+```
+ 
  
 #### returning an object
  
