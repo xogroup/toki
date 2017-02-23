@@ -78,6 +78,10 @@ describe('toki', () => {
         };
 
         routerStub = Sinon.stub(router);
+        routerStub.route = (config) => {
+
+            return routerStub[config.method.toLowerCase()](config.path, config.handler);
+        };
         done();
     });
 
@@ -260,6 +264,10 @@ describe('toki', () => {
             routerPost(url);
             route2Handler = handler;
         };
+        router.route = (config) => {
+
+            router[config.method.toLowerCase()](config.path, config.handler);
+        };
 
         const options     = {
             router
@@ -425,6 +433,10 @@ describe('toki', () => {
             routerPost(url);
             route2Handler = handler;
         };
+        router.route = (config) => {
+
+            router[config.method.toLowerCase()](config.path, config.handler);
+        };
 
         const options     = {
             router
@@ -586,6 +598,10 @@ describe('toki', () => {
 
             routerGet(url);
             route1Handler = handler;
+        };
+        router.route = (config) => {
+
+            router[config.method.toLowerCase()](config.path, config.handler);
         };
 
         const options     = {
@@ -837,6 +853,10 @@ describe('toki', () => {
 
             routerGet(url);
             route1Handler = handler;
+        };
+        router.route = (config) => {
+
+            router[config.method.toLowerCase()](config.path, config.handler);
         };
         const options     = {
             router
