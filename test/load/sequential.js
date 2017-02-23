@@ -149,7 +149,7 @@ describe('sequential actions load tests', () => {
 
                     load.push({
                         handler : route1Handler,
-                        response: {}
+                        response: { send: () => {} }
                     });
                 })
                 .then(() => {

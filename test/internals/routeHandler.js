@@ -18,7 +18,10 @@ describe('route handler tests', () => {
     const action2Spy  = Sinon.spy();
     const action3Spy  = Sinon.spy();
     const action4Spy  = Sinon.spy();
-    const responseSpy = Sinon.spy();
+    const responseSpy = {
+        send: Sinon.spy(),
+        end : Sinon.spy()
+    };
     const infoSpy     = Sinon.spy();
     const debugSpy    = Sinon.spy();
     const errorSpy    = Sinon.spy();
@@ -49,7 +52,7 @@ describe('route handler tests', () => {
         action2Spy.reset();
         action3Spy.reset();
         action4Spy.reset();
-        responseSpy.reset();
+        responseSpy.send.reset();
         infoSpy.reset();
         debugSpy.reset();
         errorSpy.reset();
@@ -58,7 +61,7 @@ describe('route handler tests', () => {
             'action-handler1': (input) => {
 
                 action1Spy();
-                input.response();
+                input.response.send();
                 return {
                     key: 'value1'
                 };
@@ -66,7 +69,7 @@ describe('route handler tests', () => {
             'action-handler2': (input) => {
 
                 action2Spy();
-                input.response();
+                input.response.send();
                 return {
                     key: 'value2'
                 };
@@ -74,7 +77,7 @@ describe('route handler tests', () => {
             'action-handler3': (input) => {
 
                 action3Spy();
-                input.response();
+                input.response.send();
                 return {
                     key: 'value3'
                 };
@@ -82,7 +85,7 @@ describe('route handler tests', () => {
             'action-handler4': (input) => {
 
                 action4Spy();
-                input.response();
+                input.response.send();
                 return {
                     key: 'value4'
                 };
@@ -138,7 +141,7 @@ describe('route handler tests', () => {
                 expect(action1Spy.calledOnce).to.be.true();
                 expect(action2Spy.calledOnce).to.be.true();
                 expect(action1Spy.calledBefore(action2Spy)).to.be.true();
-                expect(responseSpy.calledTwice).to.be.true();
+                expect(responseSpy.send.calledTwice).to.be.true();
 
                 ['action1', 'action2'].forEach((i) => {
 
@@ -190,7 +193,7 @@ describe('route handler tests', () => {
                 expect(action4Spy.calledAfter(action2Spy)).to.be.true();
                 expect(action4Spy.calledAfter(action3Spy)).to.be.true();
 
-                expect(responseSpy.callCount).to.equal(4);
+                expect(responseSpy.send.callCount).to.equal(4);
 
                 ['action1', 'action2', 'action3', 'action4'].forEach((i) => {
 
@@ -206,7 +209,7 @@ describe('route handler tests', () => {
             'action-handler1': (input) => {
 
                 action1Spy();
-                input.response();
+                input.response.send();
                 return {
                     key1: 'value1'
                 };
@@ -214,7 +217,7 @@ describe('route handler tests', () => {
             'action-handler2': function(input) {
 
                 action2Spy();
-                input.response();
+                input.response.send();
 
                 return Object.assign({
                     key2: 'value2'
@@ -223,7 +226,7 @@ describe('route handler tests', () => {
             'action-handler3': function(input) {
 
                 action3Spy();
-                input.response();
+                input.response.send();
 
                 return Object.assign({
                     key3: 'value3'
@@ -259,7 +262,7 @@ describe('route handler tests', () => {
                 expect(action3Spy.calledOnce).to.be.true();
                 expect(action1Spy.calledBefore(action2Spy)).to.be.true();
                 expect(action2Spy.calledBefore(action3Spy)).to.be.true();
-                expect(responseSpy.calledThrice).to.be.true();
+                expect(responseSpy.send.calledThrice).to.be.true();
 
                 ['action1', 'action2', 'action3'].forEach((i) => {
 
