@@ -18,12 +18,14 @@
     "url": "https://github.com/xogroup/toki/issues"
   },
   "homepage": "https://github.com/xogroup/toki#readme",
+  "peerDependencies": {
+      "toki-config": "0.x.x",
+      "toki-logger": "1.x.x"
+  },
   "dependencies": {
     "bluebird": "^3.4.7",
     "boom": "^4.2.0",
-    "joi": "10.x",
-    "toki-config": "0.0.3",
-    "toki-logger": "1.x.x"
+    "joi": "10.x"
   },
   "devDependencies": {
     "code": "4.x",
