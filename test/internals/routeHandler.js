@@ -140,9 +140,9 @@ describe('route handler tests', () => {
                 expect(action1Spy.calledBefore(action2Spy)).to.be.true();
                 expect(responseSpy.calledTwice).to.be.true();
 
-                [0, 1].forEach((i) => {
+                ['action1', 'action2'].forEach((i) => {
 
-                    expect(this[context.actions[i].name]).to.exist().and.be.an.object();
+                    expect(this.contexts[i].output).to.exist().and.be.an.object();
                 });
             });
     });
@@ -192,14 +192,9 @@ describe('route handler tests', () => {
 
                 expect(responseSpy.callCount).to.equal(4);
 
-                [0, 2].forEach((i) => {
+                ['action1', 'action2', 'action3', 'action4'].forEach((i) => {
 
-                    expect(this[context.actions[i].name]).to.exist().and.be.an.object();
-                });
-
-                [0, 1].forEach((i) => {
-
-                    expect(this[context.actions[1][i].name]).to.exist().and.be.an.object();
+                    expect(this.contexts[i].output).to.exist().and.be.an.object();
                 });
 
             });
@@ -223,7 +218,7 @@ describe('route handler tests', () => {
 
                 return Object.assign({
                     key2: 'value2'
-                }, this.action1);
+                }, this.contexts.action1.output);
             },
             'action-handler3': function(input) {
 
@@ -232,7 +227,7 @@ describe('route handler tests', () => {
 
                 return Object.assign({
                     key3: 'value3'
-                }, this.action2);
+                }, this.contexts.action2.output);
             }
         });
 
@@ -266,21 +261,21 @@ describe('route handler tests', () => {
                 expect(action2Spy.calledBefore(action3Spy)).to.be.true();
                 expect(responseSpy.calledThrice).to.be.true();
 
-                [0, 1, 2].forEach((i) => {
+                ['action1', 'action2', 'action3'].forEach((i) => {
 
-                    expect(this[context.actions[i].name]).to.exist().and.be.an.object();
+                    expect(this.contexts[i].output).to.exist().and.be.an.object();
                 });
 
-                expect(this.action1).to.equal({
+                expect(this.contexts.action1.output).to.equal({
                     key1: 'value1'
                 });
 
-                expect(this.action2).to.equal({
+                expect(this.contexts.action2.output).to.equal({
                     key1: 'value1',
                     key2: 'value2'
                 });
 
-                expect(this.action3).to.equal({
+                expect(this.contexts.action3.output).to.equal({
                     key1: 'value1',
                     key2: 'value2',
                     key3: 'value3'

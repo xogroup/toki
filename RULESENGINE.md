@@ -26,8 +26,8 @@
 __toki__ was conceived as configuration based rule engine where your configuration dictates how your routes are composed and executed by different steps.
 
 let's take a look at the different pieces that make a toki configuration.
- 
- 
+
+
  ```json
 {
  "routes": [
@@ -51,20 +51,20 @@ let's take a look at the different pieces that make a toki configuration.
 
 ### routes
 
-An array of [route](#route) objects. 
+An array of [route](#route) objects.
 
 ### route
 
  - `url` - partial http url including params in the style of __toki-bridge__ being used.
- 
+
     url : 'product/{id}'
- 
+
  - `httpAction` - http verb to be used on the route. allowed values 'GET', 'POST', 'PUT', 'DELETE', 'PATCH'.
- 
+
  - `tags` - TODO
- 
+
  - `description` - a description of your route purpose in case you forget it.
- 
+
  - `actions` - array of [actions](#actions).
 
  ```json
@@ -95,7 +95,7 @@ An array of [route](#route) objects.
   ]
 }
  ```
- 
+
 ### actions
 
 An array of [action](#action) to be executed in sequential order.
@@ -122,7 +122,7 @@ An array of [action](#action) to be executed in sequential order.
                  "name": "backorder",
                  "type": "toki-method-product-backorder",
                  "description" : "check if product inventory is below limit and initiate backorder"                 
-             }, 
+             },
              {                    
                  "name": "map",
                  "type": "toki-method-product-lookup",
@@ -138,8 +138,8 @@ An array of [action](#action) to be executed in sequential order.
 
 - `name` - name of the action to be executed. action name will be used to bind the action response to the execution context, that way subsequent actions will be able to use the previos action response, say what?
  let's take a deep breath and try to explain this nonsense:
- 
- 
+
+
  ```json
 {
  "routes": [
@@ -168,7 +168,7 @@ An array of [action](#action) to be executed in sequential order.
                  "name": "backorder",
                  "type": "toki-method-product-backorder",
                  "description" : "check if product inventory is below limit and initiate backorder"                 
-             }, 
+             },
              {                    
                  "name": "map",
                  "type": "toki-method-product-lookup",
@@ -187,7 +187,7 @@ An array of [action](#action) to be executed in sequential order.
 
 - `type` - this determines the [action handler](#action-handler) node module to be required and invoked as part of the execution.
 
-`type` is free form but we suggest our standard naming convention of pre-appending `toki-method-` to your action handler name. 
+`type` is free form but we suggest our standard naming convention of pre-appending `toki-method-` to your action handler name.
 
  ```json
 {
@@ -252,7 +252,7 @@ Clear as mud right? this code example will be crystal clear to our nerdy readers
                      "type": "toki-method-inventory-lookup-location-west",
                      "description" : "lookup product inventory in west region"                 
                  }
-             ], 
+             ],
              {                    
                  "name": "backorder",
                  "type": "toki-method-product-backorder",
@@ -268,8 +268,8 @@ Clear as mud right? this code example will be crystal clear to our nerdy readers
   ]
 }
  ```
- 
- 
+
+
  1. action `product` executes.
  2. actions `inventory-central`, `inventory-easr`, `inventory-west` execute in parallel and wait for all 3 actions fo finish execution.
  3. action `backorder` executes.
@@ -277,7 +277,7 @@ Clear as mud right? this code example will be crystal clear to our nerdy readers
 
 ## schema
 
-__toki__ uses the following [joi](https://github.com/hapijs/joi) schema to validate the configuration returned by __toki-config__. Better get your configuration right or __toki__ will throw a very friendly joi error. 
+__toki__ uses the following [joi](https://github.com/hapijs/joi) schema to validate the configuration returned by __toki-config__. Better get your configuration right or __toki__ will throw a very friendly joi error.
 
 ```Javascript
 const action  = Joi.object().keys({
@@ -300,21 +300,27 @@ const schema  = Joi.object().keys({
 ```
 
 
-## how to implement my very own action handler
+## Action Handler Contract
 
-### execution context
+### Context
 
-Before we get to the advanced stuff we need to define what the execution context and how it gets passed to your action handler.
+Most features available to methods exist in the context of that action. `this` will refer to your context. The context looks as such:
+```javascript
+    {
+        server: {
+            request //http request defined above and by the bridge,
+            response //http response defined above and by the bridge
+        },
+        action //the configuration block for the action
+        contexts: { //This is a pathway to allow you to see the contexts of other actions
+            other-action-1,
+            other action-2
+        }
+    }
+```
 
-- `context` - object passed as argument to the action handler
-
-    - `action` - an object containing the current action configuration being executed.
-
-    - `request` - request object on the flavor of your __toki-bridge__ choosing.
-
-    - `response` - response object on the flavor of your __toki-bridge__ choosing.
-
-```json
+An example configuration block available under `this.action`:
+```javascript
 {
     "action" : {                    
         "name": "inventory-central",
@@ -326,38 +332,19 @@ Before we get to the advanced stuff we need to define what the execution context
 }
 ```
 
-- `bound context` - the action handler function will get bounded and be able to access via `this` the results of previously executed functions
+### method
 
-```javascript
-module.exports = function(context) {
-  
-    const action = this['previous'];
-    
-    //do your thing
-    
-    //this will become this['current']
-    return {        
-        key : 'value'
-    };        
-}
-```
+A method it's just a fancy name for a node module that exports a function that either returns a value or a promise that fulfills into a value, simple as that. When that method is invoked in a flow config by an action, that particular instance of it is called an "action handler".
 
+Our standard naming convention for a method is prefixing it with `toki-method-*` such as `toki-method-http` or `toki-method-proxy`.
 
-### action handler
+Your action handler won't be "newable", but it will be bound to a new context every time it's called as defined in the above section.
 
-An action handler it's just a fancy name for a node module that exports a function that either returns a value or a promise that fulfills into a value, simple as that.
+Any exceptions you throw will be handled gracefully by toki.
 
-Our standard naming convention for an action action handler is prefixing it with `toki-method-` but thjs is not enforced by __toki__. 
+Sample config:
 
-**NOTES** 
-
-- do not make your action handler need instantiation by `new`.
-
-- do not handle exceptions in you action handler as __toki__ will give you a freebie and handle it for you.
-
-Sample config
- 
- ```json
+ ```javascript
 {
  "routes": [
      {
@@ -377,31 +364,31 @@ Sample config
   ]
 }
 ```
- 
+
  `toki-method-product-lookup` module will be required as
- 
+
  ```javascript
 
 //require without instantiation
 const actionHandler = require('toki-method-product-lookup');
 ```
- 
- 
+
+
 #### returning an object
- 
+
 ```javascript
 module.exports = function(context) {
-  
+
     //access request header
     const headers = context.request.headers;
-      
+
     //do your thing;
-    
+
     //write something to the response object
     context.response({
       key : 'value'        
     });
-        
+
     //and yet return something for next action to enjoy            
     return {
       key : 'value'
@@ -410,16 +397,16 @@ module.exports = function(context) {
 ```
 
 #### returning a promise
- 
+
 ```javascript
 //we all love bluebird
 const Promise = require('bluebird');
 
 module.exports = function(context) {
-    
+
     //clone context and create my own so I can add my stuff
     const newContext = Object.assign({}, context);
-           
+
     return Promise.resolve()
         .bind(newContext)
         .then(someAsyncStuff)
@@ -434,5 +421,3 @@ module.exports = function(context) {
 When fulfilling a route request __toki__ will guard against uncuaght errors and will fail gracefuly sending a [BOOM 500 error](https://github.com/hapijs/boom#boombadimplementationmessage-data---alias-internal).
 
 As a general rule avoid handling errors in your action handler unless that's part of your business logic, don't turn down the freebie __toki__ gives you/
-
-

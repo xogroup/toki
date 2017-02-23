@@ -317,12 +317,12 @@ describe('toki', () => {
                 action2Spy();
                 return Object.assign({
                     key2: 'value2'
-                }, this.action1);
+                }, this.contexts.action1.output);
             },
             'action-handler3': function(args) {
 
                 action3Spy();
-                const response = this.action2;
+                const response = this.contexts.action2.output;
                 args.response(response);
             },
             'action-handler4': function(args) {
@@ -337,12 +337,12 @@ describe('toki', () => {
                 action5Spy();
                 return Object.assign({
                     key5: 'value5'
-                }, this.action4);
+                }, this.contexts.action4.output);
             },
             'action-handler6': function(args) {
 
                 action6Spy();
-                const response = this.action5;
+                const response = this.contexts.action5.output;
                 args.response(response);
             }
         };
@@ -491,7 +491,7 @@ describe('toki', () => {
             'action-handler3': function(args) {
 
                 action3Spy();
-                const response = Object.assign({}, this.action1, this.action2);
+                const response = Object.assign({}, this.contexts.action1.output, this.contexts.action2.output);
                 args.response(response);
             },
             'action-handler4': function(args) {
@@ -511,7 +511,7 @@ describe('toki', () => {
             'action-handler6': function(args) {
 
                 action6Spy();
-                const response = Object.assign({}, this.action4, this.action5);
+                const response = Object.assign({}, this.contexts.action4.output, this.contexts.action5.output);
                 args.response(response);
             }
         };
