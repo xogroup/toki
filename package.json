@@ -32,6 +32,8 @@
     "doctoc": "^1.2.0",
     "lab": "12.x",
     "proxyquire": "^1.7.11",
-    "sinon": "^1.17.7"
+    "sinon": "^1.17.7",
+    "toki-config": "0.x.x",
+    "toki-logger": "1.x.x"
   }
 }
