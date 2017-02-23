@@ -1,6 +1,6 @@
 {
   "name": "toki",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "configuration based workflow orchestration",
   "main": "lib/index.js",
   "scripts": {
@@ -19,8 +19,8 @@
   },
   "homepage": "https://github.com/xogroup/toki#readme",
   "peerDependencies": {
-      "toki-config": "0.x.x",
-      "toki-logger": "1.x.x"
+    "toki-config": "0.x.x",
+    "toki-logger": "1.x.x"
   },
   "dependencies": {
     "bluebird": "^3.4.7",
