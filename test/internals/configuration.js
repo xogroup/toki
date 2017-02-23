@@ -51,6 +51,13 @@ describe('configuration tests', () => {
 
     it('should succeed requiring toki-config', (done) => {
 
+        const TokiConfig = require('toki-config');
+        new TokiConfig({
+            'toki-config-file': {
+                foo: 'bar'
+            }
+        });
+
         Configuration = require('../../lib/internals').configuration;
 
         expect(() => {
