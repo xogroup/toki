@@ -1,6 +1,6 @@
 {
   "name": "toki",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "configuration based workflow orchestration",
   "main": "lib/index.js",
   "scripts": {
