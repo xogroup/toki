@@ -69,6 +69,11 @@ describe('sequential actions load tests', () => {
             patch : handler
         };
 
+        router.route = (config) => {
+
+            router[config.method.toLowerCase()](config.path, config.handler);
+        };
+
         router.get = function(url, handler1) {
 
             route1Handler = handler1;

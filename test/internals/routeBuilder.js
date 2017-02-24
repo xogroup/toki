@@ -53,10 +53,16 @@ describe('routes builder tests', () => {
         };
 
         routerStub = Sinon.stub(router);
+
+        routerStub.route = (config) => {
+
+            return routerStub[config.method.toLowerCase()](config.path, config.handler);
+        };
+
         done();
     });
 
-    it('should build routes om some http methods', (done) => {
+    it('should build routes on some http methods', (done) => {
 
         const input = {
             routes: [

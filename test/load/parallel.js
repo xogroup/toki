@@ -68,6 +68,10 @@ describe('parallel action load tests', () => {
             delete: handler,
             patch : handler
         };
+        router.route = (config) => {
+
+            router[config.method.toLowerCase()](config.path, config.handler);
+        };
 
         router.get = function(url, handler1) {
 
