@@ -26,7 +26,10 @@ describe('toki', () => {
     const action4Spy  = Sinon.spy();
     const action5Spy  = Sinon.spy();
     const action6Spy  = Sinon.spy();
-    const responseSpy = Sinon.spy();
+    const responseSpy = {
+        send: Sinon.spy(),
+        end : Sinon.spy()
+    };
     const infoSpy     = Sinon.spy();
     const debugSpy    = Sinon.spy();
     const errorSpy    = Sinon.spy();
@@ -61,7 +64,8 @@ describe('toki', () => {
         action4Spy.reset();
         action5Spy.reset();
         action6Spy.reset();
-        responseSpy.reset();
+        responseSpy.send.reset();
+        responseSpy.end.reset();
         infoSpy.reset();
         debugSpy.reset();
         errorSpy.reset();
@@ -323,7 +327,7 @@ describe('toki', () => {
 
                 action3Spy();
                 const response = this.contexts.action2.output;
-                args.response(response);
+                args.response.send(response);
             },
             'action-handler4': function(args) {
 
@@ -343,7 +347,7 @@ describe('toki', () => {
 
                 action6Spy();
                 const response = this.contexts.action5.output;
-                args.response(response);
+                args.response.send(response);
             }
         };
         const LoggerProxy = {
@@ -385,21 +389,27 @@ describe('toki', () => {
             expect(routerPost.calledOnce).to.be.true();
             expect(routerPost.calledWith('route2')).to.be.true();
 
-            const response1 = Sinon.spy();
-            const response2 = Sinon.spy();
+            const response1 = {
+                send: Sinon.spy(),
+                end: Sinon.spy()
+            };
+            const response2 = {
+                send: Sinon.spy(),
+                end: Sinon.spy()
+            };
 
             return Promise.join(
                 route1Handler({}, response1),
                 route2Handler({}, response2),
                 () => {
 
-                    expect(response1.called).to.be.true();
-                    expect(response1.calledWith({
+                    expect(response1.send.called).to.be.true();
+                    expect(response1.send.calledWith({
                         key1: 'value1',
                         key2: 'value2'
                     })).to.be.true();
-                    expect(response2.called).to.be.true();
-                    expect(response2.calledWith({
+                    expect(response2.send.called).to.be.true();
+                    expect(response2.send.calledWith({
                         key4: 'value4',
                         key5: 'value5'
                     })).to.be.true();
@@ -492,7 +502,7 @@ describe('toki', () => {
 
                 action3Spy();
                 const response = Object.assign({}, this.contexts.action1.output, this.contexts.action2.output);
-                args.response(response);
+                args.response.send(response);
             },
             'action-handler4': function(args) {
 
@@ -512,7 +522,7 @@ describe('toki', () => {
 
                 action6Spy();
                 const response = Object.assign({}, this.contexts.action4.output, this.contexts.action5.output);
-                args.response(response);
+                args.response.send(response);
             }
         };
         const LoggerProxy = {
@@ -554,21 +564,27 @@ describe('toki', () => {
             expect(routerPost.calledOnce).to.be.true();
             expect(routerPost.calledWith('route2')).to.be.true();
 
-            const response1 = Sinon.spy();
-            const response2 = Sinon.spy();
+            const response1 = {
+                send: Sinon.spy(),
+                end: Sinon.spy()
+            };
+            const response2 = {
+                send: Sinon.spy(),
+                end: Sinon.spy()
+            };
 
             return Promise.join(
                 route1Handler({}, response1),
                 route2Handler({}, response2),
                 () => {
 
-                    expect(response1.called).to.be.true();
-                    expect(response1.calledWith({
+                    expect(response1.send.called).to.be.true();
+                    expect(response1.send.calledWith({
                         key1: 'value1',
                         key2: 'value2'
                     })).to.be.true();
-                    expect(response2.called).to.be.true();
-                    expect(response2.calledWith({
+                    expect(response2.send.called).to.be.true();
+                    expect(response2.send.calledWith({
                         key4: 'value4',
                         key5: 'value5'
                     })).to.be.true();
@@ -678,7 +694,7 @@ describe('toki', () => {
             expect(routerGet.calledOnce).to.be.true();
             expect(routerGet.calledWith('route1')).true();
 
-            return route1Handler({}, {})
+            return route1Handler({}, { send: () => {} })
                 .then(
                     () => {
 
@@ -879,7 +895,7 @@ describe('toki', () => {
             'action-handler3': function(args) {
 
                 action3Spy();
-                args.response(this.action2);
+                args.response.send(this.action2);
             }
         };
         const LoggerProxy = {
@@ -919,13 +935,16 @@ describe('toki', () => {
             expect(routerGet.calledOnce).to.be.true();
             expect(routerGet.calledWith('route1')).to.be.true();
 
-            const response1 = Sinon.spy();
+            const response1 = {
+                send: Sinon.spy(),
+                end: Sinon.spy()
+            };
 
             return route1Handler({}, response1)
                 .then(() => {
 
-                    expect(response1.called).to.be.true();
-                    expect(response1.args[0][0].message).to.equal('Internal Server Error');
+                    expect(response1.send.called).to.be.true();
+                    expect(response1.send.args[0][0].message).to.equal('Internal Server Error');
                     expect(action1Spy.called).to.be.true();
                     expect(action2Spy.called).to.be.true();
                     expect(action3Spy.called).to.be.false();
