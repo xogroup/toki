@@ -10,7 +10,6 @@ const Code       = require('code');
 const expect     = Code.expect;
 const Sinon      = require('sinon');
 const Promise    = require('bluebird');
-const Exceptions = require('../lib/exceptions');
 const Stubs      = require('./stubs').Toki;
 const ConfigStub = require('./stubs').Configuration;
 
@@ -97,7 +96,7 @@ describe('toki', () => {
         expect(() => {
 
             return new Toki(options);
-        }).to.throw('"options object" is required');
+        }).to.throw();
         done();
     });
 
@@ -109,18 +108,7 @@ describe('toki', () => {
         expect(() => {
 
             return new Toki(options);
-        }).to.throw('child "router object" fails because ["router object" is required]');
-        done();
-    });
-
-    it('should throw when calling getInstance before new', (done) => {
-
-        Toki = new TokiStub();
-
-        expect(() => {
-
-            Toki.getInstance();
-        }).to.throw(Exceptions.NoInstanceError);
+        }).to.throw();
         done();
     });
 
@@ -799,67 +787,6 @@ describe('toki', () => {
         done();
     });
 
-    it('should getInstance after new', (done) => {
-
-        const options = {
-            router: routerStub
-        };
-        const config  = {
-            routes: [
-                {
-                    path      : 'route1',
-                    httpAction: 'GET',
-                    actions   : [
-                        {
-                            name: 'action1',
-                            type: 'proc1'
-                        }
-                    ]
-                }
-            ]
-        };
-
-        const LoggerProxy = {
-            path : './logger',
-            spies: {
-                infoSpy,
-                debugSpy,
-                errorSpy
-            }
-        };
-        const stubs       = {
-            ConfigurationProxy: {
-                TokiConfigProxy: {
-                    config
-                },
-                path           : './internals/configuration',
-                LoggerProxy
-            },
-            RouteBuilderProxy : {
-                path             : './internals/routeBuilder',
-                RouteHandlerProxy: {
-                    path: './routeHandler',
-                    LoggerProxy
-                },
-                LoggerProxy
-            }
-        };
-
-        Toki       = new TokiStub(stubs);
-        const toki = new Toki(options);
-
-        let toki1;
-
-        expect(() => {
-
-            toki1 = Toki.getInstance();
-        }).to.not.throw();
-
-        expect(toki1).to.exist();
-        expect(toki1).to.equal(toki);
-        done();
-    });
-
     it('should handle errors on route handlers', (done) => {
 
         const routerGet = Sinon.spy();
@@ -1083,20 +1010,6 @@ describe('toki', () => {
 
         expect(debugSpy.called).to.be.true();
         expect(infoSpy.called).to.be.true();
-
-        done();
-    });
-
-    it('should log error', (done) => {
-
-        Toki = new TokiStub();
-
-        expect(() => {
-
-            Toki.getInstance();
-        }).to.throw();
-
-        expect(errorSpy.called).to.be.true();
 
         done();
     });
