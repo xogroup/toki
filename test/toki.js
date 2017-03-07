@@ -153,7 +153,7 @@ describe('toki', () => {
         Toki       = new TokiStub(stubs);
         const toki = new Toki(options);
 
-        toki.on(Toki.constants.ERROR_EVENT, (error) => {
+        toki.on('error', (error) => {
 
             expect(error).to.exist();
             expect(error.message).to.equal('child "routes" fails because ["routes" is required]');
@@ -229,7 +229,7 @@ describe('toki', () => {
 
         expect(toki).to.be.an.object();
 
-        toki.on(Toki.constants.READY_EVENT, () => {
+        toki.on('ready', () => {
 
             expect(routerStub.get.calledOnce).to.be.true();
             expect(routerStub.get.calledWith('route1')).to.be.true();
@@ -378,7 +378,7 @@ describe('toki', () => {
 
         expect(toki).to.be.an.object();
 
-        toki.on(Toki.constants.READY_EVENT, () => {
+        toki.on('ready', () => {
 
             expect(routerGet.calledOnce).to.be.true();
             expect(routerGet.calledWith('route1')).to.be.true();
@@ -557,7 +557,7 @@ describe('toki', () => {
 
         expect(toki).to.be.an.object();
 
-        toki.on(Toki.constants.READY_EVENT, () => {
+        toki.on('ready', () => {
 
             expect(routerGet.calledOnce).to.be.true();
             expect(routerGet.calledWith('route1')).to.be.true();
@@ -693,7 +693,7 @@ describe('toki', () => {
 
         expect(toki).to.be.an.object();
 
-        toki.on(Toki.constants.READY_EVENT, () => {
+        toki.on('ready', () => {
 
             expect(routerGet.calledOnce).to.be.true();
             expect(routerGet.calledWith('route1')).true();
@@ -877,7 +877,7 @@ describe('toki', () => {
 
         expect(toki).to.be.an.object();
 
-        toki.on(Toki.constants.READY_EVENT, () => {
+        toki.on('ready', () => {
 
             expect(routerGet.calledOnce).to.be.true();
             expect(routerGet.calledWith('route1')).to.be.true();
@@ -952,7 +952,7 @@ describe('toki', () => {
 
         expect(toki).to.be.an.object();
 
-        toki.on(Toki.constants.CONFIG_CHANGED_EVENT, () => {
+        toki.on('config.changed', () => {
 
             done();
         });

@@ -147,7 +147,7 @@ describe('sequential actions load tests', () => {
 
         expect(toki).to.be.an.object();
 
-        toki.on(Toki.constants.READY_EVENT, () => {
+        toki.on('ready', () => {
 
             return Promise.map(new Array(targetRequest),
                 () => {
