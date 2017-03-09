@@ -9,7 +9,6 @@ const it         = lab.it;
 const Code           = require('code');
 const expect         = Code.expect;
 const Sinon          = require('sinon');
-const Exceptions     = require('../../lib/exceptions');
 const Stubs          = require('../stubs').RouteBuilder;
 
 describe('routes builder tests', () => {
@@ -166,25 +165,6 @@ describe('routes builder tests', () => {
         expect(routerStub.delete.calledWith('route4')).to.be.true();
         expect(routerStub.patch.calledThrice).to.be.true();
         expect(routerStub.patch.calledWith('route5')).to.be.true();
-        done();
-    });
-
-    it('should throw on unknown httpAction', (done) => {
-
-        const input = {
-            routes: [
-                {
-                    path      : 'route1',
-                    httpAction: 'AYNO'
-                }
-            ],
-            router: routerStub
-        };
-
-        expect(() => {
-
-            RouteBuilder.build(input);
-        }).to.throw(Exceptions.InvalidRouteHttpAction);
         done();
     });
 });

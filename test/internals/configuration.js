@@ -78,7 +78,7 @@ describe('configuration tests', () => {
         }).to.not.throw();
 
         expect(instance).to.be.an.object();
-        expect(instance.getConfiguration).to.be.a.function();
+        expect(instance.loadConfiguration).to.be.a.function();
         done();
     });
 
@@ -89,7 +89,7 @@ describe('configuration tests', () => {
 
         const instance = new Configuration();
         expect(instance).to.be.an.object();
-        return instance.getConfiguration()
+        return instance.loadConfiguration()
             .catch((error) => {
 
                 expect(error).to.exist();
@@ -104,7 +104,7 @@ describe('configuration tests', () => {
 
         const instance = new Configuration();
         expect(instance).to.be.an.object();
-        return instance.getConfiguration()
+        return instance.loadConfiguration()
             .catch((error) => {
 
                 expect(error).to.exist();
@@ -121,7 +121,7 @@ describe('configuration tests', () => {
 
         const instance = new Configuration();
         expect(instance).to.be.an.object();
-        return instance.getConfiguration()
+        return instance.loadConfiguration()
             .catch((error) => {
 
                 expect(error).to.exist();
@@ -138,7 +138,7 @@ describe('configuration tests', () => {
 
         const instance = new Configuration();
         expect(instance).to.be.an.object();
-        return instance.getConfiguration()
+        return instance.loadConfiguration()
             .catch((error) => {
 
                 expect(error).to.exist();
@@ -155,7 +155,7 @@ describe('configuration tests', () => {
 
         const instance = new Configuration();
         expect(instance).to.be.an.object();
-        return instance.getConfiguration()
+        return instance.loadConfiguration()
             .catch((error) => {
 
                 expect(error).to.exist();
@@ -172,7 +172,7 @@ describe('configuration tests', () => {
 
         const instance = new Configuration();
         expect(instance).to.be.an.object();
-        return instance.getConfiguration()
+        return instance.loadConfiguration()
             .catch((error) => {
 
                 expect(error).to.exist();
@@ -193,7 +193,7 @@ describe('configuration tests', () => {
 
         const instance = new Configuration();
         expect(instance).to.be.an.object();
-        return instance.getConfiguration()
+        return instance.loadConfiguration()
             .catch((error) => {
 
                 expect(error).to.exist();
@@ -215,7 +215,7 @@ describe('configuration tests', () => {
 
         const instance = new Configuration();
         expect(instance).to.be.an.object();
-        return instance.getConfiguration()
+        return instance.loadConfiguration()
             .catch((error) => {
 
                 expect(error).to.exist();
@@ -238,7 +238,7 @@ describe('configuration tests', () => {
 
         const instance = new Configuration();
         expect(instance).to.be.an.object();
-        return instance.getConfiguration()
+        return instance.loadConfiguration()
             .catch((error) => {
 
                 expect(error).to.exist();
@@ -261,7 +261,7 @@ describe('configuration tests', () => {
 
         const instance = new Configuration();
         expect(instance).to.be.an.object();
-        return instance.getConfiguration()
+        return instance.loadConfiguration()
             .catch((error) => {
 
                 expect(error).to.exist();
@@ -284,7 +284,7 @@ describe('configuration tests', () => {
 
         const instance = new Configuration();
         expect(instance).to.be.an.object();
-        return instance.getConfiguration()
+        return instance.loadConfiguration()
             .catch((error) => {
 
                 expect(error).to.exist();
@@ -313,7 +313,7 @@ describe('configuration tests', () => {
         const instance = new Configuration();
         expect(instance).to.be.an.object();
 
-        return instance.getConfiguration()
+        return instance.loadConfiguration()
             .then((result) => {
 
                 expect(result).to.be.an.object();
@@ -351,7 +351,7 @@ describe('configuration tests', () => {
         const instance = new Configuration();
         expect(instance).to.be.an.object();
 
-        return instance.getConfiguration()
+        return instance.loadConfiguration()
             .then((result) => {
 
                 expect(result).to.be.an.object();
@@ -369,11 +369,11 @@ describe('configuration tests', () => {
         const instance = new Configuration();
         expect(instance).to.be.an.object();
 
-        instance.on(Configuration.constants.CONFIG_CHANGED_EVENT, () => {
+        instance.on('config.changed', () => {
 
             done();
         });
 
-        Configuration.tokiConfig.stub.emit(Configuration.constants.CONFIG_CHANGED_EVENT);
+        Configuration.tokiConfig.stub.emit('config.changed');
     });
 });

@@ -26,7 +26,7 @@ describe('options tests', () => {
         expect(() => {
 
             return new Options(input);
-        }).to.throw('"options object" is required');
+        }).to.throw();
         done();
     });
 
@@ -36,7 +36,7 @@ describe('options tests', () => {
         expect(() => {
 
             return new Options(input);
-        }).to.throw('child "router object" fails because ["router object" is required]');
+        }).to.throw();
         done();
     });
 
@@ -48,53 +48,29 @@ describe('options tests', () => {
         expect(() => {
 
             return new Options(input);
-        }).to.throw('child "router object" fails because [child "get" fails because ["get" is required]]');
+        }).to.throw();
         done();
     });
 
-    it('should throw if options.router.get not a function', (done) => {
+    it('should throw if options.router.route is not a function', (done) => {
 
         const input = {
             router: {
-                get: {}
+                route: {}
             }
         };
         expect(() => {
 
             return new Options(input);
-        }).to.throw('child "router object" fails because [child "get" fails because ["get" must be a Function]]');
+        }).to.throw();
         done();
     });
 
-    it('should throw if options.router.get function missing expected args', (done) => {
+    it('should create a new router', (done) => {
 
         const input = {
             router: {
-                get: () => {
-                }
-            }
-        };
-        expect(() => {
-
-            return new Options(input);
-        }).to.throw('child "router object" fails because [child "get" fails because ["get" must have an arity of 2]]');
-        done();
-    });
-
-    it('should pass options.router.get not a function', (done) => {
-
-        const input = {
-            router: {
-                get   : (a, b) => {
-                },
-                post  : (a, b) => {
-                },
-                put   : (a, b) => {
-                },
-                delete: (a, b) => {
-                },
-                patch : (a, b) => {
-                }
+                route: (a) => {}
             }
         };
 

@@ -10,7 +10,6 @@ const Code       = require('code');
 const expect     = Code.expect;
 const Sinon      = require('sinon');
 const Promise    = require('bluebird');
-const Exceptions = require('../lib/exceptions');
 const Stubs      = require('./stubs').Toki;
 const ConfigStub = require('./stubs').Configuration;
 
@@ -42,7 +41,6 @@ describe('toki', () => {
                 options || {},
                 {
                     LoggerProxy: {
-                        path : './internals/logger',
                         spies: {
                             infoSpy,
                             debugSpy,
@@ -97,7 +95,7 @@ describe('toki', () => {
         expect(() => {
 
             return new Toki(options);
-        }).to.throw('"options object" is required');
+        }).to.throw();
         done();
     });
 
@@ -109,18 +107,7 @@ describe('toki', () => {
         expect(() => {
 
             return new Toki(options);
-        }).to.throw('child "router object" fails because ["router object" is required]');
-        done();
-    });
-
-    it('should throw when calling getInstance before new', (done) => {
-
-        Toki = new TokiStub();
-
-        expect(() => {
-
-            Toki.getInstance();
-        }).to.throw(Exceptions.NoInstanceError);
+        }).to.throw();
         done();
     });
 
@@ -165,7 +152,7 @@ describe('toki', () => {
         Toki       = new TokiStub(stubs);
         const toki = new Toki(options);
 
-        toki.on(Toki.constants.ERROR_EVENT, (error) => {
+        toki.on('error', (error) => {
 
             expect(error).to.exist();
             expect(error.message).to.equal('child "routes" fails because ["routes" is required]');
@@ -241,7 +228,7 @@ describe('toki', () => {
 
         expect(toki).to.be.an.object();
 
-        toki.on(Toki.constants.READY_EVENT, () => {
+        toki.on('ready', () => {
 
             expect(routerStub.get.calledOnce).to.be.true();
             expect(routerStub.get.calledWith('route1')).to.be.true();
@@ -390,7 +377,7 @@ describe('toki', () => {
 
         expect(toki).to.be.an.object();
 
-        toki.on(Toki.constants.READY_EVENT, () => {
+        toki.on('ready', () => {
 
             expect(routerGet.calledOnce).to.be.true();
             expect(routerGet.calledWith('route1')).to.be.true();
@@ -569,7 +556,7 @@ describe('toki', () => {
 
         expect(toki).to.be.an.object();
 
-        toki.on(Toki.constants.READY_EVENT, () => {
+        toki.on('ready', () => {
 
             expect(routerGet.calledOnce).to.be.true();
             expect(routerGet.calledWith('route1')).to.be.true();
@@ -705,7 +692,7 @@ describe('toki', () => {
 
         expect(toki).to.be.an.object();
 
-        toki.on(Toki.constants.READY_EVENT, () => {
+        toki.on('ready', () => {
 
             expect(routerGet.calledOnce).to.be.true();
             expect(routerGet.calledWith('route1')).true();
@@ -792,67 +779,6 @@ describe('toki', () => {
         expect(() => {
 
             toki1 = new Toki(options);
-        }).to.not.throw();
-
-        expect(toki1).to.exist();
-        expect(toki1).to.equal(toki);
-        done();
-    });
-
-    it('should getInstance after new', (done) => {
-
-        const options = {
-            router: routerStub
-        };
-        const config  = {
-            routes: [
-                {
-                    path      : 'route1',
-                    httpAction: 'GET',
-                    actions   : [
-                        {
-                            name: 'action1',
-                            type: 'proc1'
-                        }
-                    ]
-                }
-            ]
-        };
-
-        const LoggerProxy = {
-            path : './logger',
-            spies: {
-                infoSpy,
-                debugSpy,
-                errorSpy
-            }
-        };
-        const stubs       = {
-            ConfigurationProxy: {
-                TokiConfigProxy: {
-                    config
-                },
-                path           : './internals/configuration',
-                LoggerProxy
-            },
-            RouteBuilderProxy : {
-                path             : './internals/routeBuilder',
-                RouteHandlerProxy: {
-                    path: './routeHandler',
-                    LoggerProxy
-                },
-                LoggerProxy
-            }
-        };
-
-        Toki       = new TokiStub(stubs);
-        const toki = new Toki(options);
-
-        let toki1;
-
-        expect(() => {
-
-            toki1 = Toki.getInstance();
         }).to.not.throw();
 
         expect(toki1).to.exist();
@@ -950,7 +876,7 @@ describe('toki', () => {
 
         expect(toki).to.be.an.object();
 
-        toki.on(Toki.constants.READY_EVENT, () => {
+        toki.on('ready', () => {
 
             expect(routerGet.calledOnce).to.be.true();
             expect(routerGet.calledWith('route1')).to.be.true();
@@ -1025,7 +951,7 @@ describe('toki', () => {
 
         expect(toki).to.be.an.object();
 
-        toki.on(Toki.constants.CONFIG_CHANGED_EVENT, () => {
+        toki.on('config.changed', () => {
 
             done();
         });
@@ -1083,20 +1009,6 @@ describe('toki', () => {
 
         expect(debugSpy.called).to.be.true();
         expect(infoSpy.called).to.be.true();
-
-        done();
-    });
-
-    it('should log error', (done) => {
-
-        Toki = new TokiStub();
-
-        expect(() => {
-
-            Toki.getInstance();
-        }).to.throw();
-
-        expect(errorSpy.called).to.be.true();
 
         done();
     });

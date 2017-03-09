@@ -1,8 +1,5 @@
 'use strict';
 
-const loggerPath     = '../../lib/internals/logger';
-const tokiLoggerName = require(loggerPath).constants.LOGGER_MODULE;
-
 class TokiLoggerStub {
 
     constructor(spies = {}) {
@@ -37,27 +34,7 @@ class TokiLoggerStub {
     }
 }
 
-class TokiLoggerInstance {
+module.exports = function (options) {
 
-    constructor(spies) {
-
-        return () => {
-
-            return new TokiLoggerStub(spies);
-        };
-    }
-}
-
-class TokiLoggerProxy {
-
-    constructor(spies = {}) {
-
-        this[tokiLoggerName] = new TokiLoggerInstance(spies);
-    }
-}
-
-module.exports = {
-    TokiLoggerStub,
-    TokiLoggerProxy
+    return { 'toki-logger': () => new TokiLoggerStub(options.spies) };
 };
-
