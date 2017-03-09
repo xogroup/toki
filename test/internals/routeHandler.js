@@ -14,10 +14,12 @@ const Stubs  = require('../stubs').RouteHandler;
 describe('route handler tests', () => {
 
     let RouteHandler;
-    const action1Spy  = Sinon.spy();
-    const action2Spy  = Sinon.spy();
-    const action3Spy  = Sinon.spy();
-    const action4Spy  = Sinon.spy();
+    const action1Spy       = Sinon.spy();
+    const action2Spy       = Sinon.spy();
+    const action3Spy       = Sinon.spy();
+    const action4Spy       = Sinon.spy();
+    const actionPromiseSpy = Sinon.spy();
+
     const responseSpy = {
         send: Sinon.spy(),
         end : Sinon.spy()
@@ -89,6 +91,16 @@ describe('route handler tests', () => {
                 return {
                     key: 'value4'
                 };
+            },
+            'action-promise': function (input) {
+
+                actionPromiseSpy();
+
+                return new this.Promise((resolve, reject) => {
+
+                    input.response.send();
+                    return resolve();
+                });
             }
         });
         done();
@@ -147,6 +159,32 @@ describe('route handler tests', () => {
 
                     expect(this.contexts[i].output).to.exist().and.be.an.object();
                 });
+            });
+    });
+
+    it('should use a passed promise library', () => {
+
+        const context = {
+            name   : 'route1',
+            actions: [
+                {
+                    name: 'actionPromise',
+                    type: 'action-promise'
+                }
+            ]
+        };
+
+        const PromiseSpy = Sinon.spy(Promise);
+        const request = {};
+        const handler = new RouteHandler(context, {
+            promise: PromiseSpy
+        });
+
+        return handler(request, responseSpy)
+            .then(() => {
+
+                expect(actionPromiseSpy.called).to.be.true();
+                expect(PromiseSpy.called).to.be.true();
             });
     });
 
