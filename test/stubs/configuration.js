@@ -2,7 +2,7 @@
 
 const Proxyquire = require('proxyquire').noCallThru();
 const TokiConfig = require('./toki-config');
-const Logger     = require('./logger');
+const Logger     = require('./toki-logger');
 
 class ConfigurationStub {
 
@@ -23,7 +23,7 @@ class ConfigurationStub {
         if (options.LoggerProxy) {
             stubs = Object.assign(
                 stubs,
-                new Logger.LoggerProxy(options.LoggerProxy)
+                Logger(options.LoggerProxy)
             );
         }
 

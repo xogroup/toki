@@ -1,7 +1,7 @@
 'use strict';
 
 const Proxyquire   = require('proxyquire').noCallThru();
-const Logger       = require('./logger');
+const Logger       = require('./toki-logger');
 const RouteHandler = require('./routeHandler');
 
 class RouteBuilderStub {
@@ -11,7 +11,7 @@ class RouteBuilderStub {
         const _options = Object.assign({},
             options.stubs || {},
             new RouteHandler.RouteHandlerProxy(options.RouteHandlerProxy),
-            new Logger.LoggerProxy(options.LoggerProxy)
+            Logger(options.LoggerProxy)
         );
 
         return Proxyquire('../../lib/internals/routeBuilder', _options);

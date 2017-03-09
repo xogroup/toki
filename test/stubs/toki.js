@@ -1,7 +1,7 @@
 'use strict';
 
 const Proxyquire    = require('proxyquire').noCallThru();
-const Logger        = require('./logger');
+const Logger        = require('./toki-logger');
 const Configuration = require('./configuration');
 const RouteBuilder  = require('./routeBuilder');
 
@@ -14,7 +14,7 @@ class TokiStub {
         if (options.LoggerProxy) {
             stubs = Object.assign(
                 stubs,
-                new Logger.LoggerProxy(options.LoggerProxy)
+                Logger(options.LoggerProxy)
             );
         }
 

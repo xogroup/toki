@@ -41,7 +41,6 @@ describe('toki', () => {
                 options || {},
                 {
                     LoggerProxy: {
-                        path : './internals/logger',
                         spies: {
                             infoSpy,
                             debugSpy,
