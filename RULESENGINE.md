@@ -6,14 +6,15 @@
 
 - [configuration](#configuration)
   - [routes](#routes)
-  - [route](#route)
+    - [route](#route)
   - [actions](#actions)
-  - [action](#action)
-  - [parallel actions](#parallel-actions)
+    - [action](#action)
+    - [parallel actions](#parallel-actions)
+  - [failure](#failure)
 - [schema](#schema)
-- [how to implement my very own action handler](#how-to-implement-my-very-own-action-handler)
-  - [execution context](#execution-context)
-  - [action handler](#action-handler)
+- [Action Handler Contract](#action-handler-contract)
+  - [Context](#context)
+  - [method](#method)
     - [returning an object](#returning-an-object)
     - [returning a promise](#returning-a-promise)
   - [error handling](#error-handling)
@@ -43,6 +44,12 @@ let's take a look at the different pieces that make a toki configuration.
                  "name": "inventory",
                  "type": "toki-method-inventory-lookup"
              }
+         ],
+         "failure"   : [
+             {
+                 "name": "rollback",
+                 "type": "toki-method-rollback"
+             }
          ]
      }
   ]
@@ -53,7 +60,7 @@ let's take a look at the different pieces that make a toki configuration.
 
 An array of [route](#route) objects.
 
-### route
+#### route
 
  - `url` - partial http url including params in the style of __toki-bridge__ being used.
 
@@ -98,7 +105,7 @@ An array of [route](#route) objects.
 
 ### actions
 
-An array of [action](#action) to be executed in sequential order.
+An array of [action](#action) rules to be executed in sequential order.
 
 
  ```json
@@ -108,33 +115,33 @@ An array of [action](#action) to be executed in sequential order.
          "path"      : "/products/{id}",
          "httpAction": "GET",
          "actions"   : [
-             {                    
+             {
                  "name": "product",
                  "type": "toki-method-product-lookup",
                  "description" : "lookup product catalog"
              },
-             {                    
+             {
                  "name": "inventory",
                  "type": "toki-method-inventory-lookup",
-                 "description" : "lookup product inventory"                 
+                 "description" : "lookup product inventory"
              },
-             {                    
+             {
                  "name": "backorder",
                  "type": "toki-method-product-backorder",
-                 "description" : "check if product inventory is below limit and initiate backorder"                 
+                 "description" : "check if product inventory is below limit and initiate backorder"
              },
-             {                    
+             {
                  "name": "map",
                  "type": "toki-method-product-lookup",
-                 "description" : "compose reponse payload with product description and inventory"                 
-             }                         
+                 "description" : "compose reponse payload with product description and inventory"
+             }
          ]
      }
   ]
 }
  ```
 
-### action
+#### action
 
 - `name` - name of the action to be executed. action name will be used to bind the action response to the execution context, that way subsequent actions will be able to use the previos action response, say what?
  let's take a deep breath and try to explain this nonsense:
@@ -217,7 +224,7 @@ On the previous configuration `toki-method-product-lookup` will be invoked as `r
 
 - `options` - optional. Configuration object to be passed to the action executor.
 
-### parallel actions
+#### parallel actions
 
 if your action is an array of [action](#action) objects, those will be executed in parallel and wait for all actions to finish before continuing with the next action in the execution process.
 
@@ -274,6 +281,54 @@ Clear as mud right? this code example will be crystal clear to our nerdy readers
  2. actions `inventory-central`, `inventory-easr`, `inventory-west` execute in parallel and wait for all 3 actions fo finish execution.
  3. action `backorder` executes.
  4. action `map` executes.
+ 
+### failure
+
+An array of [action](#action) rules to be executed in sequential order. These failure rules are executed if one or more rule from the `"actions"` ruleset error out.
+
+The failure rules are executed identically the same as [action](#action) rules, with the sole exception being that an additional property `errors` is added to the parameter passed to the toki-method handler.
+
+An error in the `"failure"` ruleset will result in a 500 Server Error response being sent.
+
+```json
+{
+ "routes": [
+     {
+         "path"      : "/products/{id}",
+         "httpAction": "GET",
+         "actions"   : [
+             {                    
+                 "name": "product",
+                 "type": "toki-method-product-lookup",
+                 "description" : "lookup product catalog"
+             },
+             {                    
+                 "name": "inventory",
+                 "type": "toki-method-inventory-lookup",
+                 "description" : "lookup product inventory"                 
+             },
+             {                    
+                 "name": "backorder",
+                 "type": "toki-method-product-backorder",
+                 "description" : "check if product inventory is below limit and initiate backorder"                 
+             },
+             {                    
+                 "name": "map",
+                 "type": "toki-method-product-lookup",
+                 "description" : "compose reponse payload with product description and inventory"                 
+             }                         
+         ],
+         "failure"   : [
+             {
+                  "name": "rollback",
+                  "type": "toki-method-rollback",
+                  "description": "roll back any changes triggered in unsuccessful 'actions'"
+             }
+         ]
+     }
+  ]
+}
+ ```
 
 ## schema
 
@@ -292,7 +347,8 @@ const routes  = Joi.object().keys({
     httpAction : Joi.string().valid('GET', 'POST', 'PUT', 'DELETE', 'PATCH'),
     tags       : Joi.array().items(Joi.string()).min(1).optional(),
     description: Joi.string().optional().allow(null, ''),
-    actions    : Joi.array().items(action, actions).min(1)
+    actions    : Joi.array().items(action, actions).min(1),
+    failure    : Joi.array().items(action, actions).min(1).optional()
 });
 const schema  = Joi.object().keys({
     routes: Joi.array().items(routes).min(1)
