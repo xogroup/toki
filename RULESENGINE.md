@@ -347,7 +347,8 @@ const routes  = Joi.object().keys({
     httpAction : Joi.string().valid('GET', 'POST', 'PUT', 'DELETE', 'PATCH'),
     tags       : Joi.array().items(Joi.string()).min(1).optional(),
     description: Joi.string().optional().allow(null, ''),
-    actions    : Joi.array().items(action, actions).min(1)
+    actions    : Joi.array().items(action, actions).min(1),
+    failure    : Joi.array().items(action, actions).min(1).optional()
 });
 const schema  = Joi.object().keys({
     routes: Joi.array().items(routes).min(1)
