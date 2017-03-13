@@ -6,6 +6,7 @@ const describe   = lab.describe;
 const beforeEach = lab.beforeEach;
 const it         = lab.it;
 
+const Boom       = require('boom');
 const Code       = require('code');
 const expect     = Code.expect;
 const Sinon      = require('sinon');
@@ -25,6 +26,7 @@ describe('toki', () => {
     const action4Spy  = Sinon.spy();
     const action5Spy  = Sinon.spy();
     const action6Spy  = Sinon.spy();
+    const failureSpy  = Sinon.spy();
     const responseSpy = {
         send: Sinon.spy(),
         end : Sinon.spy()
@@ -62,6 +64,7 @@ describe('toki', () => {
         action4Spy.reset();
         action5Spy.reset();
         action6Spy.reset();
+        failureSpy.reset();
         responseSpy.send.reset();
         responseSpy.end.reset();
         infoSpy.reset();
@@ -238,7 +241,7 @@ describe('toki', () => {
         });
     });
 
-    it('should get a toki instance and respond on sequential routes', (done) => {
+    it('should get a toki instance and call sequential actions', (done) => {
 
         const routerGet  = Sinon.spy();
         const routerPost = Sinon.spy();
@@ -413,7 +416,7 @@ describe('toki', () => {
         });
     });
 
-    it('should get a toki instance and respond on parallel routes', (done) => {
+    it('should get a toki instance and call parallel actions', (done) => {
 
         const routerGet  = Sinon.spy();
         const routerPost = Sinon.spy();
@@ -589,6 +592,605 @@ describe('toki', () => {
                     })).to.be.true();
                 }
             ).then(done);
+        });
+    });
+
+    it('should get a toki instance and call single "failure" action', (done) => {
+
+        const routerGet  = Sinon.spy();
+        const routerPost = Sinon.spy();
+        let route1Handler;
+        let route2Handler;
+
+        router.get  = function(url, handler) {
+
+            routerGet(url);
+            route1Handler = handler;
+        };
+        router.post = function(url, handler) {
+
+            routerPost(url);
+            route2Handler = handler;
+        };
+        router.route = (config) => {
+
+            router[config.method.toLowerCase()](config.path, config.handler);
+        };
+
+        const options     = {
+            router
+        };
+        const config      = {
+            routes: [
+                {
+                    path      : 'route1',
+                    httpAction: 'GET',
+                    actions   : [
+                        [
+                            {
+                                name: 'action1',
+                                type: 'action-handler1'
+                            },
+                            {
+                                name: 'action2',
+                                type: 'action-handler2'
+                            }
+                        ],
+                        {
+                            name: 'action3',
+                            type: 'action-handler3'
+                        }
+                    ],
+                    failure   : [
+                        {
+                            name: 'failure',
+                            type: 'failure-handler'
+                        }
+                    ]
+                },
+                {
+                    path      : 'route2',
+                    httpAction: 'POST',
+                    actions   : [
+                        [
+                            {
+                                name: 'action4',
+                                type: 'action-handler4'
+                            },
+                            {
+                                name: 'action5',
+                                type: 'action-handler5'
+                            }
+                        ],
+                        {
+                            name: 'action6',
+                            type: 'action-handler6'
+                        }
+                    ],
+                    failure   : [
+                        {
+                            name: 'failure',
+                            type: 'failure-handler'
+                        }
+                    ]
+                }
+            ]
+        };
+        const actionStubs = {
+            'action-handler1': function(args) {
+
+                action1Spy();
+                return {
+                    key1: 'value1'
+                };
+            },
+            'action-handler2': function(args) {
+
+                action2Spy();
+                throw new Error('Kick out of action-handler2');
+            },
+            'action-handler3': function(args) {
+
+                action3Spy();
+                const response = Object.assign({}, this.contexts.action1.output, this.contexts.action2.output);
+                args.response.send(response);
+            },
+            'action-handler4': function(args) {
+
+                action4Spy();
+                return {
+                    key4: 'value4'
+                };
+            },
+            'action-handler5': function(args) {
+
+                action5Spy();
+                return {
+                    key5: 'value5'
+                };
+            },
+            'action-handler6': function(args) {
+
+                action6Spy();
+                throw new Error('Kick out of action-handler6');
+            },
+            'failure-handler': function(args) {
+
+                failureSpy(args.errors);
+                const response = Boom.badRequest();
+                args.response.send(response);
+            }
+        };
+        const LoggerProxy = {
+            path : './logger',
+            spies: {
+                infoSpy,
+                debugSpy,
+                errorSpy
+            }
+        };
+        const stubs       = {
+            ConfigurationProxy: {
+                TokiConfigProxy: {
+                    config
+                },
+                path           : './internals/configuration',
+                LoggerProxy
+            },
+            RouteBuilderProxy : {
+                path             : './internals/routeBuilder',
+                RouteHandlerProxy: {
+                    stubs: actionStubs,
+                    path : './routeHandler',
+                    LoggerProxy
+                },
+                LoggerProxy
+            }
+        };
+
+        Toki       = new TokiStub(stubs);
+        const toki = new Toki(options);
+
+        expect(toki).to.be.an.object();
+
+        toki.on('ready', () => {
+
+            expect(routerGet.calledOnce).to.be.true();
+            expect(routerGet.calledWith('route1')).to.be.true();
+            expect(routerPost.calledOnce).to.be.true();
+            expect(routerPost.calledWith('route2')).to.be.true();
+
+            const response1 = {
+                send: Sinon.spy(),
+                end: Sinon.spy()
+            };
+            const response2 = {
+                send: Sinon.spy(),
+                end: Sinon.spy()
+            };
+
+            return Promise.join(
+                route1Handler({}, response1),
+                route2Handler({}, response2),
+                () => {
+
+                    expect(failureSpy.calledTwice).to.be.true();
+                    expect(failureSpy.args[0][0][0]).to.be.an.error('Kick out of action-handler2');
+                    expect(failureSpy.args[1][0][0]).to.be.an.error('Kick out of action-handler6');
+                    expect(response1.send.called).to.be.true();
+                    expect(response1.send.calledWith(Boom.badRequest())).to.be.true();
+                    expect(response2.send.called).to.be.true();
+                    expect(response2.send.calledWith(Boom.badRequest())).to.be.true();
+                }
+            )
+                .then(done)
+                .catch(done);
+        });
+    });
+
+    it('should get a toki instance and call sequential "failure" action', (done) => {
+
+        const routerGet  = Sinon.spy();
+        const routerPost = Sinon.spy();
+        let route1Handler;
+        let route2Handler;
+
+        router.get  = function(url, handler) {
+
+            routerGet(url);
+            route1Handler = handler;
+        };
+        router.post = function(url, handler) {
+
+            routerPost(url);
+            route2Handler = handler;
+        };
+        router.route = (config) => {
+
+            router[config.method.toLowerCase()](config.path, config.handler);
+        };
+
+        const options     = {
+            router
+        };
+        const config      = {
+            routes: [
+                {
+                    path      : 'route1',
+                    httpAction: 'GET',
+                    actions   : [
+                        [
+                            {
+                                name: 'action1',
+                                type: 'action-handler1'
+                            },
+                            {
+                                name: 'action2',
+                                type: 'action-handler2'
+                            }
+                        ],
+                        {
+                            name: 'action3',
+                            type: 'action-handler3'
+                        }
+                    ],
+                    failure   : [
+                        {
+                            name: 'failure1',
+                            type: 'failure-handler'
+                        },
+                        {
+                            name: 'failure2',
+                            type: 'failure-handler'
+                        }
+                    ]
+                },
+                {
+                    path      : 'route2',
+                    httpAction: 'POST',
+                    actions   : [
+                        [
+                            {
+                                name: 'action4',
+                                type: 'action-handler4'
+                            },
+                            {
+                                name: 'action5',
+                                type: 'action-handler5'
+                            }
+                        ],
+                        {
+                            name: 'action6',
+                            type: 'action-handler6'
+                        }
+                    ],
+                    failure   : [
+                        {
+                            name: 'failure1',
+                            type: 'failure-handler'
+                        },
+                        {
+                            name: 'failure2',
+                            type: 'failure-handler'
+                        }
+                    ]
+                }
+            ]
+        };
+        const actionStubs = {
+            'action-handler1': function(args) {
+
+                action1Spy();
+                return {
+                    key1: 'value1'
+                };
+            },
+            'action-handler2': function(args) {
+
+                action2Spy();
+                throw new Error('Kick out of action-handler2');
+            },
+            'action-handler3': function(args) {
+
+                action3Spy();
+                const response = Object.assign({}, this.contexts.action1.output, this.contexts.action2.output);
+                args.response.send(response);
+            },
+            'action-handler4': function(args) {
+
+                action4Spy();
+                return {
+                    key4: 'value4'
+                };
+            },
+            'action-handler5': function(args) {
+
+                action5Spy();
+                return {
+                    key5: 'value5'
+                };
+            },
+            'action-handler6': function(args) {
+
+                action6Spy();
+                throw new Error('Kick out of action-handler6');
+            },
+            'failure-handler': function(args) {
+
+                failureSpy(args.errors);
+                const response = Boom.badRequest();
+                args.response.send(response);
+            }
+        };
+        const LoggerProxy = {
+            path : './logger',
+            spies: {
+                infoSpy,
+                debugSpy,
+                errorSpy
+            }
+        };
+        const stubs       = {
+            ConfigurationProxy: {
+                TokiConfigProxy: {
+                    config
+                },
+                path           : './internals/configuration',
+                LoggerProxy
+            },
+            RouteBuilderProxy : {
+                path             : './internals/routeBuilder',
+                RouteHandlerProxy: {
+                    stubs: actionStubs,
+                    path : './routeHandler',
+                    LoggerProxy
+                },
+                LoggerProxy
+            }
+        };
+
+        Toki       = new TokiStub(stubs);
+        const toki = new Toki(options);
+
+        expect(toki).to.be.an.object();
+
+        toki.on('ready', () => {
+
+            expect(routerGet.calledOnce).to.be.true();
+            expect(routerGet.calledWith('route1')).to.be.true();
+            expect(routerPost.calledOnce).to.be.true();
+            expect(routerPost.calledWith('route2')).to.be.true();
+
+            const response1 = {
+                send: Sinon.spy(),
+                end: Sinon.spy()
+            };
+            const response2 = {
+                send: Sinon.spy(),
+                end: Sinon.spy()
+            };
+
+            return Promise.join(
+                route1Handler({}, response1),
+                route2Handler({}, response2),
+                () => {
+
+                    expect(failureSpy.callCount).to.equal(4);
+                    expect(failureSpy.args[0][0][0]).to.be.an.error('Kick out of action-handler2');
+                    expect(failureSpy.args[1][0][0]).to.be.an.error('Kick out of action-handler6');
+                    expect(response1.send.called).to.be.true();
+                    expect(response1.send.calledWith(Boom.badRequest())).to.be.true();
+                    expect(response2.send.called).to.be.true();
+                    expect(response2.send.calledWith(Boom.badRequest())).to.be.true();
+                }
+            )
+                .then(done)
+                .catch(done);
+        });
+    });
+
+    it('should get a toki instance and call parallel "failure" action', (done) => {
+
+        const routerGet  = Sinon.spy();
+        const routerPost = Sinon.spy();
+        let route1Handler;
+        let route2Handler;
+
+        router.get  = function(url, handler) {
+
+            routerGet(url);
+            route1Handler = handler;
+        };
+        router.post = function(url, handler) {
+
+            routerPost(url);
+            route2Handler = handler;
+        };
+        router.route = (config) => {
+
+            router[config.method.toLowerCase()](config.path, config.handler);
+        };
+
+        const options     = {
+            router
+        };
+        const config      = {
+            routes: [
+                {
+                    path      : 'route1',
+                    httpAction: 'GET',
+                    actions   : [
+                        [
+                            {
+                                name: 'action1',
+                                type: 'action-handler1'
+                            },
+                            {
+                                name: 'action2',
+                                type: 'action-handler2'
+                            }
+                        ],
+                        {
+                            name: 'action3',
+                            type: 'action-handler3'
+                        }
+                    ],
+                    failure   : [
+                        [
+                            {
+                                name: 'failure1',
+                                type: 'failure-handler'
+                            },
+                            {
+                                name: 'failure2',
+                                type: 'failure-handler'
+                            }
+                        ]
+                    ]
+                },
+                {
+                    path      : 'route2',
+                    httpAction: 'POST',
+                    actions   : [
+                        [
+                            {
+                                name: 'action4',
+                                type: 'action-handler4'
+                            },
+                            {
+                                name: 'action5',
+                                type: 'action-handler5'
+                            }
+                        ],
+                        {
+                            name: 'action6',
+                            type: 'action-handler6'
+                        }
+                    ],
+                    failure   : [
+                        [
+                            {
+                                name: 'failure1',
+                                type: 'failure-handler'
+                            },
+                            {
+                                name: 'failure2',
+                                type: 'failure-handler'
+                            }
+                        ]
+                    ]
+                }
+            ]
+        };
+        const actionStubs = {
+            'action-handler1': function(args) {
+
+                action1Spy();
+                return {
+                    key1: 'value1'
+                };
+            },
+            'action-handler2': function(args) {
+
+                action2Spy();
+                throw new Error('Kick out of action-handler2');
+            },
+            'action-handler3': function(args) {
+
+                action3Spy();
+                const response = Object.assign({}, this.contexts.action1.output, this.contexts.action2.output);
+                args.response.send(response);
+            },
+            'action-handler4': function(args) {
+
+                action4Spy();
+                return {
+                    key4: 'value4'
+                };
+            },
+            'action-handler5': function(args) {
+
+                action5Spy();
+                return {
+                    key5: 'value5'
+                };
+            },
+            'action-handler6': function(args) {
+
+                action6Spy();
+                throw new Error('Kick out of action-handler6');
+            },
+            'failure-handler': function(args) {
+
+                failureSpy(args.errors);
+                const response = Boom.badRequest();
+                args.response.send(response);
+            }
+        };
+        const LoggerProxy = {
+            path : './logger',
+            spies: {
+                infoSpy,
+                debugSpy,
+                errorSpy
+            }
+        };
+        const stubs       = {
+            ConfigurationProxy: {
+                TokiConfigProxy: {
+                    config
+                },
+                path           : './internals/configuration',
+                LoggerProxy
+            },
+            RouteBuilderProxy : {
+                path             : './internals/routeBuilder',
+                RouteHandlerProxy: {
+                    stubs: actionStubs,
+                    path : './routeHandler',
+                    LoggerProxy
+                },
+                LoggerProxy
+            }
+        };
+
+        Toki       = new TokiStub(stubs);
+        const toki = new Toki(options);
+
+        expect(toki).to.be.an.object();
+
+        toki.on('ready', () => {
+
+            expect(routerGet.calledOnce).to.be.true();
+            expect(routerGet.calledWith('route1')).to.be.true();
+            expect(routerPost.calledOnce).to.be.true();
+            expect(routerPost.calledWith('route2')).to.be.true();
+
+            const response1 = {
+                send: Sinon.spy(),
+                end: Sinon.spy()
+            };
+            const response2 = {
+                send: Sinon.spy(),
+                end: Sinon.spy()
+            };
+
+            return Promise.join(
+                route1Handler({}, response1),
+                route2Handler({}, response2),
+                () => {
+
+                    expect(failureSpy.callCount).to.equal(4);
+                    expect(failureSpy.args[0][0][0]).to.be.an.error('Kick out of action-handler2');
+                    expect(failureSpy.args[2][0][0]).to.be.an.error('Kick out of action-handler6');
+                    expect(response1.send.called).to.be.true();
+                    expect(response1.send.calledWith(Boom.badRequest())).to.be.true();
+                    expect(response2.send.called).to.be.true();
+                    expect(response2.send.calledWith(Boom.badRequest())).to.be.true();
+                }
+            )
+                .then(done)
+                .catch(done);
         });
     });
 
@@ -1011,5 +1613,795 @@ describe('toki', () => {
         expect(infoSpy.called).to.be.true();
 
         done();
+    });
+
+    describe('Response delegation', () => {
+
+        const response = {
+            send: Sinon.spy(),
+            end: Sinon.spy()
+        };
+        const httpSpy = Sinon.spy();
+        const rabbitSpy = Sinon.spy();
+
+        const methodHttp = function(actionContext) {
+
+            const result = {
+                success: true,
+                other: 'data'
+            };
+            httpSpy();
+
+            if (actionContext.action.clientResponse) {
+                if (actionContext.request.failThis) {
+                    if (actionContext.action.name === 'failure1') {
+                        // successful handling in "failure" to send error response back to client
+                        return actionContext.response.send(Boom.badRequest());
+                    }
+                    // method failure in "actions"
+                    throw new Error('Failed out the http handler on purpose');
+                }
+                else {
+                    // successful handling in "actions" to send response back to client
+                    return actionContext.response.send(result);
+                }
+            }
+            else {
+                // successful handling in "actions", do not send response to client
+                return {
+                    stepData: actionContext.action.name,
+                    done    : true
+                };
+            }
+        };
+
+        const methodRabbit = function() {
+
+            rabbitSpy();
+            return {
+                success: true,
+                other: 'data'
+            };
+        };
+
+        beforeEach((done) => {
+
+            httpSpy.reset();
+            rabbitSpy.reset();
+            response.send.reset();
+            response.end.reset();
+            done();
+        });
+
+        it('should proxy an http request', (done) => {
+
+            const routerPost = Sinon.spy();
+            let route1Handler;
+
+            router.post = function(url, handler) {
+
+                routerPost(url);
+                route1Handler = handler;
+            };
+            router.route = (config) => {
+
+                router[config.method.toLowerCase()](config.path, config.handler);
+            };
+
+            const options     = {
+                router
+            };
+            const config      = {
+                routes: [
+                    {
+                        path      : 'route1',
+                        httpAction: 'POST',
+                        actions   : [
+                            {
+                                name          : 'action1',
+                                type          : 'method-http',
+                                clientResponse: {
+                                    sendIt: true
+                                }
+                            }
+                        ]
+                    }
+                ]
+            };
+            const actionStubs = {
+                'method-http': methodHttp
+            };
+            const LoggerProxy = {
+                path : './logger',
+                spies: {
+                    infoSpy,
+                    debugSpy,
+                    errorSpy
+                }
+            };
+            const stubs       = {
+                ConfigurationProxy: {
+                    TokiConfigProxy: {
+                        config
+                    },
+                    path           : './internals/configuration',
+                    LoggerProxy
+                },
+                RouteBuilderProxy : {
+                    path             : './internals/routeBuilder',
+                    RouteHandlerProxy: {
+                        stubs: actionStubs,
+                        path : './routeHandler',
+                        LoggerProxy
+                    },
+                    LoggerProxy
+                }
+            };
+
+            Toki       = new TokiStub(stubs);
+            const toki = new Toki(options);
+
+            expect(toki).to.be.an.object();
+
+            toki.on('ready', () => {
+
+                expect(routerPost.calledOnce).to.be.true();
+                expect(routerPost.calledWith('route1')).to.be.true();
+
+                return route1Handler({
+                    initial: 'data'
+                }, response)
+                    .then(() => {
+
+                        expect(response.send.called).to.be.true();
+                        expect(response.send.calledWith({
+                            success: true,
+                            other: 'data'
+                        })).to.be.true();
+                    })
+                    .then(done)
+                    .catch(done);
+            });
+        });
+
+        it('should make an http request and emit a rabbit event', (done) => {
+
+            const routerPost = Sinon.spy();
+            let route1Handler;
+
+            router.post = function(url, handler) {
+
+                routerPost(url);
+                route1Handler = handler;
+            };
+            router.route = (config) => {
+
+                router[config.method.toLowerCase()](config.path, config.handler);
+            };
+
+            const options     = {
+                router
+            };
+            const config      = {
+                routes: [
+                    {
+                        path      : 'route1',
+                        httpAction: 'POST',
+                        actions   : [
+                            {
+                                name          : 'action1',
+                                type          : 'method-http',
+                                clientResponse: {
+                                    sendIt: true
+                                }
+                            },
+                            {
+                                name: 'action2',
+                                type: 'method-rabbit'
+                            }
+                        ]
+                    }
+                ]
+            };
+            const actionStubs = {
+                'method-http': methodHttp,
+                'method-rabbit': methodRabbit
+            };
+            const LoggerProxy = {
+                path : './logger',
+                spies: {
+                    infoSpy,
+                    debugSpy,
+                    errorSpy
+                }
+            };
+            const stubs       = {
+                ConfigurationProxy: {
+                    TokiConfigProxy: {
+                        config
+                    },
+                    path           : './internals/configuration',
+                    LoggerProxy
+                },
+                RouteBuilderProxy : {
+                    path             : './internals/routeBuilder',
+                    RouteHandlerProxy: {
+                        stubs: actionStubs,
+                        path : './routeHandler',
+                        LoggerProxy
+                    },
+                    LoggerProxy
+                }
+            };
+
+            Toki       = new TokiStub(stubs);
+            const toki = new Toki(options);
+
+            expect(toki).to.be.an.object();
+
+            toki.on('ready', () => {
+
+                expect(routerPost.calledOnce).to.be.true();
+                expect(routerPost.calledWith('route1')).to.be.true();
+
+                return route1Handler({
+                    initial: 'data'
+                }, response)
+                    .then(() => {
+
+                        expect(httpSpy.called).to.be.true();
+                        expect(response.send.called).to.be.true();
+                        expect(response.send.calledWith({
+                            success: true,
+                            other: 'data'
+                        })).to.be.true();
+                        expect(rabbitSpy.called).to.be.true();
+
+                    })
+                    .then(done)
+                    .catch(done);
+            });
+        });
+
+        it('should make multiple http requests and emit a rabbit event', (done) => {
+
+            const routerPost = Sinon.spy();
+            let route1Handler;
+
+            router.post = function(url, handler) {
+
+                routerPost(url);
+                route1Handler = handler;
+            };
+            router.route = (config) => {
+
+                router[config.method.toLowerCase()](config.path, config.handler);
+            };
+
+            const options     = {
+                router
+            };
+            const config      = {
+                routes: [
+                    {
+                        path      : 'route1',
+                        httpAction: 'POST',
+                        actions   : [
+                            {
+                                name: 'action1',
+                                type: 'method-http'
+                            },
+                            {
+                                name          : 'action2',
+                                type          : 'method-http',
+                                clientResponse: {
+                                    sendIt: true
+                                }
+                            },
+                            {
+                                name: 'action3',
+                                type: 'method-rabbit'
+                            }
+                        ]
+                    }
+                ]
+            };
+            const actionStubs = {
+                'method-http': methodHttp,
+                'method-rabbit': methodRabbit
+            };
+            const LoggerProxy = {
+                path : './logger',
+                spies: {
+                    infoSpy,
+                    debugSpy,
+                    errorSpy
+                }
+            };
+            const stubs       = {
+                ConfigurationProxy: {
+                    TokiConfigProxy: {
+                        config
+                    },
+                    path           : './internals/configuration',
+                    LoggerProxy
+                },
+                RouteBuilderProxy : {
+                    path             : './internals/routeBuilder',
+                    RouteHandlerProxy: {
+                        stubs: actionStubs,
+                        path : './routeHandler',
+                        LoggerProxy
+                    },
+                    LoggerProxy
+                }
+            };
+
+            Toki       = new TokiStub(stubs);
+            const toki = new Toki(options);
+
+            expect(toki).to.be.an.object();
+
+            toki.on('ready', () => {
+
+                expect(routerPost.calledOnce).to.be.true();
+                expect(routerPost.calledWith('route1')).to.be.true();
+
+                return route1Handler({
+                    initial: 'data'
+                }, response)
+                    .then(() => {
+
+                        expect(httpSpy.calledTwice).to.be.true();
+                        expect(response.send.calledOnce).to.be.true();
+                        expect(response.send.calledWith({
+                            success: true,
+                            other: 'data'
+                        })).to.be.true();
+                        expect(rabbitSpy.called).to.be.true();
+
+                    })
+                    .then(done)
+                    .catch(done);
+            });
+        });
+
+        it('should handle failure in sequential steps with no "failure" handler', (done) => {
+
+            const routerPost = Sinon.spy();
+            let route1Handler;
+
+            router.post = function(url, handler) {
+
+                routerPost(url);
+                route1Handler = handler;
+            };
+            router.route = (config) => {
+
+                router[config.method.toLowerCase()](config.path, config.handler);
+            };
+
+            const options     = {
+                router
+            };
+            const config      = {
+                routes: [
+                    {
+                        path      : 'route1',
+                        httpAction: 'POST',
+                        actions   : [
+                            {
+                                name: 'action1',
+                                type: 'method-http'
+                            },
+                            {
+                                name          : 'action2',
+                                type          : 'method-http',
+                                clientResponse: {
+                                    sendIt: true
+                                }
+                            },
+                            {
+                                name: 'action3',
+                                type: 'method-rabbit'
+                            }
+                        ]
+                    }
+                ]
+            };
+            const actionStubs = {
+                'method-http': methodHttp,
+                'method-rabbit': methodRabbit
+            };
+            const LoggerProxy = {
+                path : './logger',
+                spies: {
+                    infoSpy,
+                    debugSpy,
+                    errorSpy
+                }
+            };
+            const stubs       = {
+                ConfigurationProxy: {
+                    TokiConfigProxy: {
+                        config
+                    },
+                    path           : './internals/configuration',
+                    LoggerProxy
+                },
+                RouteBuilderProxy : {
+                    path             : './internals/routeBuilder',
+                    RouteHandlerProxy: {
+                        stubs: actionStubs,
+                        path : './routeHandler',
+                        LoggerProxy
+                    },
+                    LoggerProxy
+                }
+            };
+
+            Toki       = new TokiStub(stubs);
+            const toki = new Toki(options);
+
+            expect(toki).to.be.an.object();
+
+            toki.on('ready', () => {
+
+                expect(routerPost.calledOnce).to.be.true();
+                expect(routerPost.calledWith('route1')).to.be.true();
+
+                return route1Handler({
+                    initial : 'data',
+                    failThis: true
+                }, response)
+                    .then(() => {
+
+                        expect(httpSpy.calledTwice).to.be.true();
+                        expect(response.send.calledOnce).to.be.true();
+                        expect(response.send.args[0][0].isBoom).to.be.true();
+                        expect(response.send.args[0][0].output.statusCode).to.equal(500);
+                        expect(rabbitSpy.called).to.be.false();
+
+                    })
+                    .then(done)
+                    .catch(done);
+            });
+        });
+
+        it('should handle failure in parallel steps with no "failure" handler', (done) => {
+
+            const routerPost = Sinon.spy();
+            let route1Handler;
+
+            router.post = function(url, handler) {
+
+                routerPost(url);
+                route1Handler = handler;
+            };
+            router.route = (config) => {
+
+                router[config.method.toLowerCase()](config.path, config.handler);
+            };
+
+            const options     = {
+                router
+            };
+            const config      = {
+                routes: [
+                    {
+                        path      : 'route1',
+                        httpAction: 'POST',
+                        actions   : [
+                            [
+                                {
+                                    name: 'action1',
+                                    type: 'method-http'
+                                },
+                                {
+                                    name          : 'action2',
+                                    type          : 'method-http',
+                                    clientResponse: {
+                                        sendIt: true
+                                    }
+                                }
+                            ],
+                            {
+                                name: 'action3',
+                                type: 'method-rabbit'
+                            }
+                        ]
+                    }
+                ]
+            };
+            const actionStubs = {
+                'method-http': methodHttp,
+                'method-rabbit': methodRabbit
+            };
+            const LoggerProxy = {
+                path : './logger',
+                spies: {
+                    infoSpy,
+                    debugSpy,
+                    errorSpy
+                }
+            };
+            const stubs       = {
+                ConfigurationProxy: {
+                    TokiConfigProxy: {
+                        config
+                    },
+                    path           : './internals/configuration',
+                    LoggerProxy
+                },
+                RouteBuilderProxy : {
+                    path             : './internals/routeBuilder',
+                    RouteHandlerProxy: {
+                        stubs: actionStubs,
+                        path : './routeHandler',
+                        LoggerProxy
+                    },
+                    LoggerProxy
+                }
+            };
+
+            Toki       = new TokiStub(stubs);
+            const toki = new Toki(options);
+
+            expect(toki).to.be.an.object();
+
+            toki.on('ready', () => {
+
+                expect(routerPost.calledOnce).to.be.true();
+                expect(routerPost.calledWith('route1')).to.be.true();
+
+                return route1Handler({
+                    initial : 'data',
+                    failThis: true
+                }, response)
+                    .then(() => {
+
+                        expect(httpSpy.calledTwice).to.be.true();
+                        expect(response.send.calledOnce).to.be.true();
+                        expect(response.send.args[0][0].isBoom).to.be.true();
+                        expect(response.send.args[0][0].output.statusCode).to.equal(500);
+                        expect(rabbitSpy.called).to.be.false();
+
+                    })
+                    .then(done)
+                    .catch(done);
+            });
+        });
+
+        it('should handle failure in sequential steps with sequential "failure" handler', (done) => {
+
+            const routerPost = Sinon.spy();
+            let route1Handler;
+
+            router.post = function(url, handler) {
+
+                routerPost(url);
+                route1Handler = handler;
+            };
+            router.route = (config) => {
+
+                router[config.method.toLowerCase()](config.path, config.handler);
+            };
+
+            const options     = {
+                router
+            };
+            const config      = {
+                routes: [
+                    {
+                        path      : 'route1',
+                        httpAction: 'POST',
+                        actions   : [
+                            {
+                                name: 'action1',
+                                type: 'method-http'
+                            },
+                            {
+                                name          : 'action2',
+                                type          : 'method-http',
+                                clientResponse: {
+                                    sendIt: true
+                                }
+                            },
+                            {
+                                name: 'action3',
+                                type: 'method-rabbit'
+                            }
+                        ],
+                        failure: [
+                            {
+                                name          : 'failure1',
+                                type          : 'method-http',
+                                clientResponse: {
+                                    sendIt: true
+                                }
+                            },
+                            {
+                                name: 'failure2',
+                                type: 'method-rabbit'
+                            }
+                        ]
+                    }
+                ]
+            };
+            const actionStubs = {
+                'method-http': methodHttp,
+                'method-rabbit': methodRabbit
+            };
+            const LoggerProxy = {
+                path : './logger',
+                spies: {
+                    infoSpy,
+                    debugSpy,
+                    errorSpy
+                }
+            };
+            const stubs       = {
+                ConfigurationProxy: {
+                    TokiConfigProxy: {
+                        config
+                    },
+                    path           : './internals/configuration',
+                    LoggerProxy
+                },
+                RouteBuilderProxy : {
+                    path             : './internals/routeBuilder',
+                    RouteHandlerProxy: {
+                        stubs: actionStubs,
+                        path : './routeHandler',
+                        LoggerProxy
+                    },
+                    LoggerProxy
+                }
+            };
+
+            Toki       = new TokiStub(stubs);
+            const toki = new Toki(options);
+
+            expect(toki).to.be.an.object();
+
+            toki.on('ready', () => {
+
+                expect(routerPost.calledOnce).to.be.true();
+                expect(routerPost.calledWith('route1')).to.be.true();
+
+                return route1Handler({
+                    initial : 'data',
+                    failThis: true
+                }, response)
+                    .then(() => {
+
+                        expect(httpSpy.calledThrice).to.be.true();
+                        expect(response.send.calledOnce).to.be.true();
+                        expect(response.send.args[0][0].isBoom).to.be.true();
+                        expect(response.send.args[0][0].output.statusCode).to.equal(400);
+                        expect(rabbitSpy.calledOnce).to.be.true();
+
+                    })
+                    .then(done)
+                    .catch(done);
+            });
+        });
+
+        it('should handle failure in parallel steps with sequential "failure" handler', (done) => {
+
+            const routerPost = Sinon.spy();
+            let route1Handler;
+
+            router.post = function(url, handler) {
+
+                routerPost(url);
+                route1Handler = handler;
+            };
+            router.route = (config) => {
+
+                router[config.method.toLowerCase()](config.path, config.handler);
+            };
+
+            const options     = {
+                router
+            };
+            const config      = {
+                routes: [
+                    {
+                        path      : 'route1',
+                        httpAction: 'POST',
+                        actions   : [
+                            [
+                                {
+                                    name: 'action1',
+                                    type: 'method-http'
+                                },
+                                {
+                                    name          : 'action2',
+                                    type          : 'method-http',
+                                    clientResponse: {
+                                        sendIt: true
+                                    }
+                                }
+                            ],
+                            {
+                                name: 'action3',
+                                type: 'method-rabbit'
+                            }
+                        ],
+                        failure: [
+                            {
+                                name          : 'failure1',
+                                type          : 'method-http',
+                                clientResponse: {
+                                    sendIt: true
+                                }
+                            },
+                            {
+                                name: 'failure2',
+                                type: 'method-rabbit'
+                            }
+                        ]
+                    }
+                ]
+            };
+            const actionStubs = {
+                'method-http': methodHttp,
+                'method-rabbit': methodRabbit
+            };
+            const LoggerProxy = {
+                path : './logger',
+                spies: {
+                    infoSpy,
+                    debugSpy,
+                    errorSpy
+                }
+            };
+            const stubs       = {
+                ConfigurationProxy: {
+                    TokiConfigProxy: {
+                        config
+                    },
+                    path           : './internals/configuration',
+                    LoggerProxy
+                },
+                RouteBuilderProxy : {
+                    path             : './internals/routeBuilder',
+                    RouteHandlerProxy: {
+                        stubs: actionStubs,
+                        path : './routeHandler',
+                        LoggerProxy
+                    },
+                    LoggerProxy
+                }
+            };
+
+            Toki       = new TokiStub(stubs);
+            const toki = new Toki(options);
+
+            expect(toki).to.be.an.object();
+
+            toki.on('ready', () => {
+
+                expect(routerPost.calledOnce).to.be.true();
+                expect(routerPost.calledWith('route1')).to.be.true();
+
+                return route1Handler({
+                    initial : 'data',
+                    failThis: true
+                }, response)
+                    .then(() => {
+
+                        expect(httpSpy.calledThrice).to.be.true();
+                        expect(response.send.calledOnce).to.be.true();
+                        expect(response.send.args[0][0].isBoom).to.be.true();
+                        expect(response.send.args[0][0].output.statusCode).to.equal(400);
+                        expect(rabbitSpy.calledOnce).to.be.true();
+
+                    })
+                    .then(done)
+                    .catch(done);
+            });
+        });
     });
 });
