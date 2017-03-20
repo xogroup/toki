@@ -27,7 +27,7 @@ describe('Responder', () => {
         done();
     });
 
-    it('should fail if the action config does not contain "clientResponse"', (done) => {
+    it('should fail if the action config does not contain "clientResponseConfiguration"', (done) => {
 
         expect(Responder.bind({
             config: {}
@@ -35,11 +35,11 @@ describe('Responder', () => {
         done();
     });
 
-    it('should fail if the action clientResponse config does not contain "statusCode"', (done) => {
+    it('should fail if the action clientResponseConfiguration config does not contain "statusCode"', (done) => {
 
         const context = {
             config: {
-                clientResponse: {}
+                clientResponseConfiguration: {}
             }
         };
 
@@ -47,11 +47,11 @@ describe('Responder', () => {
         done();
     });
 
-    it('should fail if the action clientResponse.statusCode is not a number or string', (done) => {
+    it('should fail if the action clientResponseConfiguration.statusCode is not a number or string', (done) => {
 
         const context = {
             config: {
-                clientResponse: {
+                clientResponseConfiguration: {
                     statusCode: true
                 }
             }
@@ -61,11 +61,11 @@ describe('Responder', () => {
         done();
     });
 
-    it('should fail if the action clientResponse.payload is not an object or string', (done) => {
+    it('should fail if the action clientResponseConfiguration.payload is not an object or string', (done) => {
 
         const context = {
             config: {
-                clientResponse: {
+                clientResponseConfiguration: {
                     statusCode: 201,
                     payload   : 201
                 }
@@ -80,7 +80,7 @@ describe('Responder', () => {
 
         const context = {
             config: {
-                clientResponse: {
+                clientResponseConfiguration: {
                     statusCode: 200
                 }
             },
@@ -105,7 +105,7 @@ describe('Responder', () => {
 
         const context = {
             config: {
-                clientResponse: {
+                clientResponseConfiguration: {
                     statusCode: 200,
                     payload   : {
                         send: 'this data'
@@ -124,17 +124,17 @@ describe('Responder', () => {
             .then(() => {
 
                 expect(responseSpy.send.calledOnce).to.be.true();
-                expect(responseSpy.send.calledWith(context.config.clientResponse.payload)).to.be.true();
+                expect(responseSpy.send.calledWith(context.config.clientResponseConfiguration.payload)).to.be.true();
                 expect(responseSpy.code.calledOnce).to.be.true();
                 expect(responseSpy.code.calledWith(200)).to.be.true();
             });
     });
 
-    it('should support templated clientResponse.statusCode string', () => {
+    it('should support templated clientResponseConfiguration.statusCode string', () => {
 
         const context = {
             config: {
-                clientResponse: {
+                clientResponseConfiguration: {
                     statusCode: '{{previousStep.output.code}}'
                 }
             },
@@ -162,11 +162,11 @@ describe('Responder', () => {
             });
     });
 
-    it('should support templated clientResponse.payload string', () => {
+    it('should support templated clientResponseConfiguration.payload string', () => {
 
         const context = {
             config: {
-                clientResponse: {
+                clientResponseConfiguration: {
                     statusCode: '{{previousStep.output.code}}',
                     payload   : '{{previousStep.output}}'
                 }

@@ -1633,7 +1633,7 @@ describe('toki', () => {
             };
             httpSpy();
 
-            if (actionContext.action.clientResponse) {
+            if (actionContext.action.clientResponseConfiguration) {
                 if (actionContext.request.failThis) {
                     if (actionContext.action.name === 'failure1') {
                         // successful handling in "failure" to send error response back to client
@@ -1702,7 +1702,7 @@ describe('toki', () => {
                             {
                                 name          : 'action1',
                                 type          : 'method-http',
-                                clientResponse: {
+                                clientResponseConfiguration: {
                                     sendIt: true
                                 }
                             }
@@ -1797,7 +1797,7 @@ describe('toki', () => {
                             {
                                 name: 'action2',
                                 type: 'responder',
-                                clientResponse: {
+                                clientResponseConfiguration: {
                                     statusCode: 200,
                                     payload: {
                                         success: true,
@@ -1893,7 +1893,7 @@ describe('toki', () => {
                             {
                                 name          : 'action1',
                                 type          : 'method-http',
-                                clientResponse: {
+                                clientResponseConfiguration: {
                                     sendIt: true
                                 }
                             },
@@ -1996,7 +1996,7 @@ describe('toki', () => {
                             {
                                 name          : 'action2',
                                 type          : 'method-http',
-                                clientResponse: {
+                                clientResponseConfiguration: {
                                     sendIt: true
                                 }
                             },
@@ -2099,7 +2099,7 @@ describe('toki', () => {
                             {
                                 name          : 'action2',
                                 type          : 'method-http',
-                                clientResponse: {
+                                clientResponseConfiguration: {
                                     sendIt: true
                                 }
                             },
@@ -2202,7 +2202,7 @@ describe('toki', () => {
                                 {
                                     name          : 'action2',
                                     type          : 'method-http',
-                                    clientResponse: {
+                                    clientResponseConfiguration: {
                                         sendIt: true
                                     }
                                 }
@@ -2305,7 +2305,7 @@ describe('toki', () => {
                             {
                                 name          : 'action2',
                                 type          : 'method-http',
-                                clientResponse: {
+                                clientResponseConfiguration: {
                                     sendIt: true
                                 }
                             },
@@ -2318,7 +2318,7 @@ describe('toki', () => {
                             {
                                 name          : 'failure1',
                                 type          : 'method-http',
-                                clientResponse: {
+                                clientResponseConfiguration: {
                                     sendIt: true
                                 }
                             },
@@ -2421,7 +2421,7 @@ describe('toki', () => {
                                 {
                                     name          : 'action2',
                                     type          : 'method-http',
-                                    clientResponse: {
+                                    clientResponseConfiguration: {
                                         sendIt: true
                                     }
                                 }
@@ -2435,7 +2435,7 @@ describe('toki', () => {
                             {
                                 name          : 'failure1',
                                 type          : 'method-http',
-                                clientResponse: {
+                                clientResponseConfiguration: {
                                     sendIt: true
                                 }
                             },
