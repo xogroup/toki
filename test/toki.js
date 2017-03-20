@@ -1619,7 +1619,8 @@ describe('toki', () => {
 
         const response = {
             send: Sinon.spy(),
-            end: Sinon.spy()
+            end : Sinon.spy(),
+            code: Sinon.spy()
         };
         const httpSpy = Sinon.spy();
         const rabbitSpy = Sinon.spy();
@@ -1670,6 +1671,7 @@ describe('toki', () => {
             rabbitSpy.reset();
             response.send.reset();
             response.end.reset();
+            response.code.reset();
             done();
         });
 
@@ -1754,6 +1756,106 @@ describe('toki', () => {
                     .then(() => {
 
                         expect(response.send.called).to.be.true();
+                        expect(response.send.calledWith({
+                            success: true,
+                            other: 'data'
+                        })).to.be.true();
+                    })
+                    .then(done)
+                    .catch(done);
+            });
+        });
+
+        it('should proxy an http request and respond with internal responder', (done) => {
+
+            const routerPost = Sinon.spy();
+            let route1Handler;
+
+            router.post = function(url, handler) {
+
+                routerPost(url);
+                route1Handler = handler;
+            };
+            router.route = (config) => {
+
+                router[config.method.toLowerCase()](config.path, config.handler);
+            };
+
+            const options     = {
+                router
+            };
+            const config      = {
+                routes: [
+                    {
+                        path      : 'route1',
+                        httpAction: 'POST',
+                        actions   : [
+                            {
+                                name: 'action1',
+                                type: 'method-http'
+                            },
+                            {
+                                name: 'action2',
+                                type: 'responder',
+                                clientResponse: {
+                                    statusCode: 200,
+                                    payload: {
+                                        success: true,
+                                        other: 'data'
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ]
+            };
+            const actionStubs = {
+                'method-http': methodHttp
+            };
+            const LoggerProxy = {
+                path : './logger',
+                spies: {
+                    infoSpy,
+                    debugSpy,
+                    errorSpy
+                }
+            };
+            const stubs       = {
+                ConfigurationProxy: {
+                    TokiConfigProxy: {
+                        config
+                    },
+                    path           : './internals/configuration',
+                    LoggerProxy
+                },
+                RouteBuilderProxy : {
+                    path             : './internals/routeBuilder',
+                    RouteHandlerProxy: {
+                        stubs: actionStubs,
+                        path : './routeHandler',
+                        LoggerProxy
+                    },
+                    LoggerProxy
+                }
+            };
+
+            Toki       = new TokiStub(stubs);
+            const toki = new Toki(options);
+
+            expect(toki).to.be.an.object();
+
+            toki.on('ready', () => {
+
+                expect(routerPost.calledOnce).to.be.true();
+                expect(routerPost.calledWith('route1')).to.be.true();
+
+                return route1Handler({
+                    initial: 'data'
+                }, response)
+                    .then(() => {
+
+                        expect(response.code.calledWith(200)).to.be.true();
+                        expect(response.send.calledOnce).to.be.true();
                         expect(response.send.calledWith({
                             success: true,
                             other: 'data'

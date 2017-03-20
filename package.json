@@ -23,17 +23,18 @@
     "toki-logger": "1.x.x"
   },
   "dependencies": {
-    "bluebird": "^3.4.7",
-    "boom": "^4.2.0",
-    "joi": "10.x"
+    "bluebird": "3.4.x",
+    "boom": "4.2.x",
+    "joi": "10.x",
+    "toki-templater": "1.x.x"
   },
   "devDependencies": {
     "code": "4.x",
-    "doctoc": "^1.2.0",
+    "doctoc": "1.x",
     "lab": "12.x",
-    "proxyquire": "^1.7.11",
-    "sinon": "^1.17.7",
-    "toki-config": "0.x.x",
-    "toki-logger": "1.x.x"
+    "proxyquire": "1.7.x",
+    "sinon": "1.17.x",
+    "toki-config": "0.x",
+    "toki-logger": "1.x"
   }
 }
