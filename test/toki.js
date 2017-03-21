@@ -1620,7 +1620,7 @@ describe('toki', () => {
         const response = {
             send: Sinon.spy(),
             end : Sinon.spy(),
-            code: Sinon.spy()
+            statusCode: Sinon.spy()
         };
         const httpSpy = Sinon.spy();
         const rabbitSpy = Sinon.spy();
@@ -1671,7 +1671,7 @@ describe('toki', () => {
             rabbitSpy.reset();
             response.send.reset();
             response.end.reset();
-            response.code.reset();
+            response.statusCode.reset();
             done();
         });
 
@@ -1854,7 +1854,7 @@ describe('toki', () => {
                 }, response)
                     .then(() => {
 
-                        expect(response.code.calledWith(200)).to.be.true();
+                        expect(response.statusCode.calledWith(200)).to.be.true();
                         expect(response.send.calledOnce).to.be.true();
                         expect(response.send.calledWith({
                             success: true,

@@ -16,13 +16,13 @@ const Responder = require('../../lib/internals/responder');
 describe('Responder', () => {
 
     const responseSpy = {
-        code: Sinon.spy(),
+        statusCode: Sinon.spy(),
         send: Sinon.spy()
     };
 
     beforeEach((done) => {
 
-        responseSpy.code.reset();
+        responseSpy.statusCode.reset();
         responseSpy.send.reset();
         done();
     });
@@ -96,8 +96,8 @@ describe('Responder', () => {
             .then(() => {
 
                 expect(responseSpy.send.calledOnce).to.be.true();
-                expect(responseSpy.code.calledOnce).to.be.true();
-                expect(responseSpy.code.calledWith(200)).to.be.true();
+                expect(responseSpy.statusCode.calledOnce).to.be.true();
+                expect(responseSpy.statusCode.calledWith(200)).to.be.true();
             });
     });
 
@@ -125,8 +125,8 @@ describe('Responder', () => {
 
                 expect(responseSpy.send.calledOnce).to.be.true();
                 expect(responseSpy.send.calledWith(context.config.clientResponseConfiguration.payload)).to.be.true();
-                expect(responseSpy.code.calledOnce).to.be.true();
-                expect(responseSpy.code.calledWith(200)).to.be.true();
+                expect(responseSpy.statusCode.calledOnce).to.be.true();
+                expect(responseSpy.statusCode.calledWith(200)).to.be.true();
             });
     });
 
@@ -157,8 +157,8 @@ describe('Responder', () => {
             .then(() => {
 
                 expect(responseSpy.send.calledOnce).to.be.true();
-                expect(responseSpy.code.calledOnce).to.be.true();
-                expect(responseSpy.code.calledWith(201)).to.be.true();
+                expect(responseSpy.statusCode.calledOnce).to.be.true();
+                expect(responseSpy.statusCode.calledWith(201)).to.be.true();
             });
     });
 
@@ -192,8 +192,8 @@ describe('Responder', () => {
 
                 expect(responseSpy.send.calledOnce).to.be.true();
                 expect(responseSpy.send.calledWith(context.contexts.previousStep.output)).to.be.true();
-                expect(responseSpy.code.calledOnce).to.be.true();
-                expect(responseSpy.code.calledWith(201)).to.be.true();
+                expect(responseSpy.statusCode.calledOnce).to.be.true();
+                expect(responseSpy.statusCode.calledWith(201)).to.be.true();
             });
     });
 });
