@@ -325,7 +325,7 @@ describe('toki', () => {
 
                 action3Spy();
                 const response = this.contexts.action2.output;
-                args.response.send(response);
+                args.server.response.send(response);
             },
             'action-handler4': function(args) {
 
@@ -345,7 +345,7 @@ describe('toki', () => {
 
                 action6Spy();
                 const response = this.contexts.action5.output;
-                args.response.send(response);
+                args.server.response.send(response);
             }
         };
         const LoggerProxy = {
@@ -504,7 +504,7 @@ describe('toki', () => {
 
                 action3Spy();
                 const response = Object.assign({}, this.contexts.action1.output, this.contexts.action2.output);
-                args.response.send(response);
+                args.server.response.send(response);
             },
             'action-handler4': function(args) {
 
@@ -524,7 +524,7 @@ describe('toki', () => {
 
                 action6Spy();
                 const response = Object.assign({}, this.contexts.action4.output, this.contexts.action5.output);
-                args.response.send(response);
+                args.server.response.send(response);
             }
         };
         const LoggerProxy = {
@@ -693,7 +693,7 @@ describe('toki', () => {
 
                 action3Spy();
                 const response = Object.assign({}, this.contexts.action1.output, this.contexts.action2.output);
-                args.response.send(response);
+                args.server.response.send(response);
             },
             'action-handler4': function(args) {
 
@@ -718,7 +718,7 @@ describe('toki', () => {
 
                 failureSpy(args.errors);
                 const response = Boom.badRequest();
-                args.response.send(response);
+                args.server.response.send(response);
             }
         };
         const LoggerProxy = {
@@ -894,7 +894,7 @@ describe('toki', () => {
 
                 action3Spy();
                 const response = Object.assign({}, this.contexts.action1.output, this.contexts.action2.output);
-                args.response.send(response);
+                args.server.response.send(response);
             },
             'action-handler4': function(args) {
 
@@ -919,7 +919,7 @@ describe('toki', () => {
 
                 failureSpy(args.errors);
                 const response = Boom.badRequest();
-                args.response.send(response);
+                args.server.response.send(response);
             }
         };
         const LoggerProxy = {
@@ -1099,7 +1099,7 @@ describe('toki', () => {
 
                 action3Spy();
                 const response = Object.assign({}, this.contexts.action1.output, this.contexts.action2.output);
-                args.response.send(response);
+                args.server.response.send(response);
             },
             'action-handler4': function(args) {
 
@@ -1124,7 +1124,7 @@ describe('toki', () => {
 
                 failureSpy(args.errors);
                 const response = Boom.badRequest();
-                args.response.send(response);
+                args.server.response.send(response);
             }
         };
         const LoggerProxy = {
@@ -1443,7 +1443,7 @@ describe('toki', () => {
             'action-handler3': function(args) {
 
                 action3Spy();
-                args.response.send(this.action2);
+                args.server.response.send(this.action2);
             }
         };
         const LoggerProxy = {
@@ -1634,17 +1634,17 @@ describe('toki', () => {
             httpSpy();
 
             if (actionContext.action.clientResponseConfiguration) {
-                if (actionContext.request.failThis) {
+                if (actionContext.server.request.failThis) {
                     if (actionContext.action.name === 'failure1') {
                         // successful handling in "failure" to send error response back to client
-                        return actionContext.response.send(Boom.badRequest());
+                        return actionContext.server.response.send(Boom.badRequest());
                     }
                     // method failure in "actions"
                     throw new Error('Failed out the http handler on purpose');
                 }
                 else {
                     // successful handling in "actions" to send response back to client
-                    return actionContext.response.send(result);
+                    return actionContext.server.response.send(result);
                 }
             }
             else {

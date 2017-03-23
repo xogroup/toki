@@ -63,7 +63,7 @@ describe('route handler tests', () => {
             'action-handler1': (input) => {
 
                 action1Spy();
-                input.response.send();
+                input.server.response.send();
                 return {
                     key: 'value1'
                 };
@@ -71,7 +71,7 @@ describe('route handler tests', () => {
             'action-handler2': (input) => {
 
                 action2Spy();
-                input.response.send();
+                input.server.response.send();
                 return {
                     key: 'value2'
                 };
@@ -79,7 +79,7 @@ describe('route handler tests', () => {
             'action-handler3': (input) => {
 
                 action3Spy();
-                input.response.send();
+                input.server.response.send();
                 return {
                     key: 'value3'
                 };
@@ -87,7 +87,7 @@ describe('route handler tests', () => {
             'action-handler4': (input) => {
 
                 action4Spy();
-                input.response.send();
+                input.server.response.send();
                 return {
                     key: 'value4'
                 };
@@ -96,9 +96,9 @@ describe('route handler tests', () => {
 
                 actionPromiseSpy();
 
-                return new this.Promise((resolve, reject) => {
+                return new input.Promise((resolve, reject) => {
 
-                    input.response.send();
+                    input.server.response.send();
                     return resolve();
                 });
             }
@@ -247,7 +247,7 @@ describe('route handler tests', () => {
             'action-handler1': (input) => {
 
                 action1Spy();
-                input.response.send();
+                input.server.response.send();
                 return {
                     key1: 'value1'
                 };
@@ -255,7 +255,7 @@ describe('route handler tests', () => {
             'action-handler2': function(input) {
 
                 action2Spy();
-                input.response.send();
+                input.server.response.send();
 
                 return Object.assign({
                     key2: 'value2'
@@ -264,7 +264,7 @@ describe('route handler tests', () => {
             'action-handler3': function(input) {
 
                 action3Spy();
-                input.response.send();
+                input.server.response.send();
 
                 return Object.assign({
                     key3: 'value3'
