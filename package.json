@@ -25,8 +25,9 @@
   "dependencies": {
     "bluebird": "3.4.x",
     "boom": "4.2.x",
+    "hoek": "4.x",
     "joi": "10.x",
-    "toki-templater": "1.x.x"
+    "toki-templater": "2.x.x"
   },
   "devDependencies": {
     "code": "4.x",
