@@ -1,5 +1,6 @@
-# toki
-A configuration based orchestration rules engine with support for custom plugins.  
+# Toki
+
+> A configuration based orchestration rules engine that's protocol agnostic.  
 
 <!-- Badges Go Here -->
 [![npm version](https://badge.fury.io/js/toki.svg)](https://badge.fury.io/js/toki)
@@ -11,102 +12,37 @@ Lead Maintainer: [Cesar Hernandez](https://github.com/cesarhq)
 
 ## Introduction
 
-Everybody is riding the hype around **Microservices Architecture**, which makes sense until you realize you end up with several microservices that need to be coordinated to fulfill your business requirements.
-  
-Enter __toki__ and its ecosystem of modules/plugins which was born from the aforementioned necessity.
- 
- 
+Toki is an orchestration layer for microservice based architectures. It is both HTTP server agnostic, and downstream protocol agnostic. It's configuration based and allows you to bring your own logger.
+
 ### Key Features
 
-- __Configuration based__, bring your own modules implemeting your own business logic, install them, add them to the configuration an watch do their thing.
- 
-- __Web servers__, by using the different __toki-bride__ implementations you can use your favorite web server and integrate __toki__ into it.
++ *Configuration based* using version-able JSON files. Easy to write, easy to deploy.
 
-## Installation
++ *Bring your own HTTP framework* so you can use Express, Koa, Hapi or whatever else floats your boat.
 
-```
-npm install toki
-```
++ *Protocol Agnostic* so you can speak whatever your microservices are speaking. HTTP, RabbitMQ, etc.
+
++ *Supports any standard logger* so you can plug it into your existing log setup.
+
+## Getting Started
+
+To allow Toki to be used by any http framework, Toki uses small modules we call 'bridges'. The bridge appropriate for your webserver framework is where you should start:
+
++ [Hapi](https://github.com/xogroup/toki-hapi-bridge)
+
+_Don't see a bridge you need? Please feel free to contribute one. Bridges are easy to write, we promise!_
+
+You can also peek at our [reference implementation](https://github.com/xogroup/toki-reference), which provides a fully setup and ready to roll Toki implementation out of the box that's heavily commented and explained.
 
 ## API
 
 See the [API Reference](http://github.com/xogroup/toki/blob/master/API.md).
 
-## Dependencies
+We also have guides on how to build your very own:
 
-### toki-config
+[Toki configuration](./RULESENGINE.md#configuration)
 
-Main interface to obtain rules configuration to be executed by __toki__.  
-
-```Javascript
-//setup config
-const TokiConfig = require('toki-cofig');
-//I need file based config based
-const tokiConfig = new TokiConfig({
-    'toki-config-file' : {
-        path : './config.json'
-    }
-});
-
-//setup toki
-const Toki = require('toki');
-const toki = new Toki();
-```
-
-More on [toki-config](https://github.com/xogroup/toki-config).
-
-
-### toki-logger
-
-A logging interface that can be instantiated beforehand with any standard logging library. 
-__toki__ will require the toki-logger instance to log events and actions related to it's own lifecycle and request/rule execution.
-
-```Javascript
-//setup logger
-const winston = require('winston');
-const TokiLogger = require('toki-logger');
-const logger = TokiLogger(winston);
-
-//setup toki
-const Toki = require('toki');
-const toki = new Toki();
-```
-
-More on [toki-logger](https://github.com/xogroup/toki-logger).
-
-## Usage
-
-Code wise there's not a lot todo in regards to __toki__. The main concerns for you would be:
-
-- put together your configuration as per [toki configuration](./RULESENGINE.md#configuration)
-
-- build your action handler as per [toki action handler](./RULESENGINE.md#how-to-implement-my-very-own-action-handler) listed steps
-
-- setup __toki__ dependencies
-
-- require and new __toki__
-
-- sit back and relax skynet err.. __toki__ is at the wheel
-
-```Javascript
-//setup config
-const TokiConfig = require('toki-cofig');
-//I need file based config based
-const tokiConfig = new TokiConfig({
-    'toki-config-file' : {
-        path : './config.json'
-    }
-});
-
-//setup logger
-const winston = require('winston');
-const TokiLogger = require('toki-logger');
-const logger = TokiLogger(winston);
-
-//setup toki
-const Toki = require('toki');
-const toki = new Toki();
-```
+[Toki action handler](./RULESENGINE.md#how-to-implement-my-very-own-action-handler)
 
 ### Examples
 
@@ -116,10 +52,11 @@ Check out the [Examples](http://github.com/xogroup/toki/blob/master/Examples.md)
 
 We love community and contributions! Please check out our [guidelines](http://github.com/xogroup/toki/blob/master/.github/CONTRIBUTING.md) before making any PRs.
 
-## Setting up for development
+### Setting up for development
 
 Getting yourself setup and bootstrapped is easy.  Use the following commands after you clone down.
 
 ```
-npm install && npm test
+npm install
+npm test
 ```

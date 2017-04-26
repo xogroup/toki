@@ -158,7 +158,7 @@ An array of [action](#action) rules to be executed in sequential order.
                  "name": "product",
                  "type": "toki-method-product-lookup",
                  "description" : "lookup product catalog",
-                 "options" : {
+                 "inputConfiguration" : {
                     "url" : "http://product/"
                  }
              },
@@ -166,7 +166,7 @@ An array of [action](#action) rules to be executed in sequential order.
                  "name": "inventory",
                  "type": "toki-method-inventory-lookup",
                  "description" : "lookup product inventory",               
-                 "options" : {
+                 "inputConfiguration" : {
                     "url" : "http://inventory/",
                     "locations" : ["East", "West", "Central"]
                  }
@@ -281,7 +281,7 @@ Clear as mud right? this code example will be crystal clear to our nerdy readers
  2. actions `inventory-central`, `inventory-easr`, `inventory-west` execute in parallel and wait for all 3 actions fo finish execution.
  3. action `backorder` executes.
  4. action `map` executes.
- 
+
 ### failure
 
 An array of [action](#action) rules to be executed in sequential order. These failure rules are executed if one or more rule from the `"actions"` ruleset error out.
@@ -377,14 +377,16 @@ Most features available to methods exist in the context of that action. `this` w
 
 An example configuration block available under `this.action`:
 ```javascript
-{
-    "action" : {                    
-        "name": "inventory-central",
-        "type": "toki-method-inventory-lookup-location-central",
-        "description" : "lookup product inventory in central region"                 
+{                 
+    "name": "inventory-central",
+    "type": "toki-method-inventory-lookup-location-central",
+    "description": "lookup product inventory in central region",
+    "inputConfiguration": {
+        //your input config options go here
     },
-    "request" : {},
-    "response" : {}   
+    "clientResponseConfiguration": {
+        //config for shaping your response go here
+    }  
 }
 ```
 
@@ -411,7 +413,7 @@ Sample config:
                  "name": "product",
                  "type": "toki-method-product-lookup",
                  "description" : "lookup product catalog",
-                 "options" : {
+                 "inputConfiguration" : {
                     "url" : "http://product/"
                  }
              }             
