@@ -977,7 +977,216 @@ describe('toki', () => {
 
                     expect(failureSpy.callCount).to.equal(4);
                     expect(failureSpy.args[0][0][0]).to.be.an.error('Kick out of action-handler2');
+                    const stringifiedError = JSON.stringify(failureSpy.args[0][0][0]);
+                    expect(JSON.parse(stringifiedError).errorMessage).to.equal('Kick out of action-handler2');
+                    expect(JSON.parse(stringifiedError).stackTrace).to.equal(failureSpy.args[0][0][0].stack);
                     expect(failureSpy.args[1][0][0]).to.be.an.error('Kick out of action-handler6');
+                    expect(response1.send.called).to.be.true();
+                    expect(response1.send.calledWith(Boom.badRequest())).to.be.true();
+                    expect(response2.send.called).to.be.true();
+                    expect(response2.send.calledWith(Boom.badRequest())).to.be.true();
+                }
+            )
+                .then(done)
+                .catch(done);
+        });
+    });
+
+    it('should get a toki instance and call sequential "failure" action for Boom and non-Error errors', (done) => {
+
+        const routerGet  = Sinon.spy();
+        const routerPost = Sinon.spy();
+        let route1Handler;
+        let route2Handler;
+
+        router.get  = function(url, handler) {
+
+            routerGet(url);
+            route1Handler = handler;
+        };
+        router.post = function(url, handler) {
+
+            routerPost(url);
+            route2Handler = handler;
+        };
+        router.route = (config) => {
+
+            router[config.method.toLowerCase()](config.path, config.handler);
+        };
+
+        const options     = {
+            router
+        };
+        const config      = {
+            routes: [
+                {
+                    path      : 'route1',
+                    httpAction: 'GET',
+                    actions   : [
+                        [
+                            {
+                                name: 'action1',
+                                type: 'action-handler1'
+                            },
+                            {
+                                name: 'action2',
+                                type: 'action-handler2'
+                            }
+                        ],
+                        {
+                            name: 'action3',
+                            type: 'action-handler3'
+                        }
+                    ],
+                    failure   : [
+                        {
+                            name: 'failure1',
+                            type: 'failure-handler'
+                        },
+                        {
+                            name: 'failure2',
+                            type: 'failure-handler'
+                        }
+                    ]
+                },
+                {
+                    path      : 'route2',
+                    httpAction: 'POST',
+                    actions   : [
+                        [
+                            {
+                                name: 'action4',
+                                type: 'action-handler4'
+                            },
+                            {
+                                name: 'action5',
+                                type: 'action-handler5'
+                            }
+                        ],
+                        {
+                            name: 'action6',
+                            type: 'action-handler6'
+                        }
+                    ],
+                    failure   : [
+                        {
+                            name: 'failure1',
+                            type: 'failure-handler'
+                        },
+                        {
+                            name: 'failure2',
+                            type: 'failure-handler'
+                        }
+                    ]
+                }
+            ]
+        };
+        const actionStubs = {
+            'action-handler1': function(args) {
+
+                action1Spy();
+                return {
+                    key1: 'value1'
+                };
+            },
+            'action-handler2': function(args) {
+
+                action2Spy();
+                throw new Boom.badRequest('Kick out of action-handler2');
+            },
+            'action-handler3': function(args) {
+
+                action3Spy();
+                const response = Object.assign({}, this.contexts.action1.output, this.contexts.action2.output);
+                args.server.response.send(response);
+            },
+            'action-handler4': function(args) {
+
+                action4Spy();
+                return {
+                    key4: 'value4'
+                };
+            },
+            'action-handler5': function(args) {
+
+                action5Spy();
+                return {
+                    key5: 'value5'
+                };
+            },
+            'action-handler6': function(args) {
+
+                action6Spy();
+                throw {
+                    msg: 'Kick out of action-handler6'
+                };
+            },
+            'failure-handler': function(args) {
+
+                failureSpy(args.errors);
+                const response = Boom.badRequest();
+                args.server.response.send(response);
+            }
+        };
+        const LoggerProxy = {
+            path : './logger',
+            spies: {
+                infoSpy,
+                debugSpy,
+                errorSpy
+            }
+        };
+        const stubs       = {
+            ConfigurationProxy: {
+                TokiConfigProxy: {
+                    config
+                },
+                path           : './internals/configuration',
+                LoggerProxy
+            },
+            RouteBuilderProxy : {
+                path             : './internals/routeBuilder',
+                RouteHandlerProxy: {
+                    stubs: actionStubs,
+                    path : './routeHandler',
+                    LoggerProxy
+                },
+                LoggerProxy
+            }
+        };
+
+        Toki       = new TokiStub(stubs);
+        const toki = new Toki(options);
+
+        expect(toki).to.be.an.object();
+
+        toki.on('ready', () => {
+
+            expect(routerGet.calledOnce).to.be.true();
+            expect(routerGet.calledWith('route1')).to.be.true();
+            expect(routerPost.calledOnce).to.be.true();
+            expect(routerPost.calledWith('route2')).to.be.true();
+
+            const response1 = {
+                send: Sinon.spy(),
+                end: Sinon.spy()
+            };
+            const response2 = {
+                send: Sinon.spy(),
+                end: Sinon.spy()
+            };
+
+            return Promise.join(
+                route1Handler({}, response1),
+                route2Handler({}, response2),
+                () => {
+
+                    expect(failureSpy.callCount).to.equal(4);
+                    expect(failureSpy.args[0][0][0]).to.be.an.error('Kick out of action-handler2');
+                    const stringifiedError = JSON.stringify(failureSpy.args[0][0][0]);
+                    expect(JSON.parse(stringifiedError).errorMessage).to.equal('Kick out of action-handler2');
+                    expect(JSON.parse(stringifiedError).stackTrace).to.equal(failureSpy.args[0][0][0].stack);
+                    expect(failureSpy.args[1][0][0].msg).to.equal('Kick out of action-handler6');
                     expect(response1.send.called).to.be.true();
                     expect(response1.send.calledWith(Boom.badRequest())).to.be.true();
                     expect(response2.send.called).to.be.true();
