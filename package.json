@@ -21,9 +21,9 @@
   "peerDependencies": {},
   "dependencies": {
     "bluebird": "3.4.x",
-    "boom": "4.2.x",
-    "hoek": "4.x",
-    "joi": "10.x",
+    "boom": "6.0.0",
+    "hoek": "5.0.3",
+    "joi": "13.0.0",
     "toki-config": "0.2.x",
     "toki-logger": "1.x.x",
     "toki-templater": "2.x.x"
